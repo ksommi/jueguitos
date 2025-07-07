@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="25%" style="stop-color:#16213e"/>
+      <stop offset="50%" style="stop-color:#0f3460"/>
+      <stop offset="75%" style="stop-color:#533483"/>
+      <stop offset="100%" style="stop-color:#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#84CC16"/>
+      <stop offset="33%" style="stop-color:#06B6D4"/>
+      <stop offset="66%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#F59E0B"/>
+    </linearGradient>
+    <filter id="textShadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.8)"/>
+    </filter>
+  </defs>
+  
+  <!-- Fondo -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Patrón de cuadrícula retro -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  
+  <!-- Efectos de partículas -->
+  <circle cx="100" cy="100" r="3" fill="#84CC16" opacity="0.8">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="1100" cy="150" r="2" fill="#06B6D4" opacity="0.6">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="200" cy="500" r="4" fill="#8B5CF6" opacity="0.7">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="1000" cy="450" r="3" fill="#F59E0B" opacity="0.8">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Joystick central grande -->
+  <g transform="translate(50, 200)">
+    <rect x="0" y="0" width="200" height="120" rx="60" ry="60" fill="url(#textGradient)" opacity="0.9" filter="url(#textShadow)"/>
+    
+    <!-- D-pad -->
+    <rect x="30" y="45" width="35" height="8" rx="4" fill="#000"/>
+    <rect x="44" y="31" width="8" height="35" rx="4" fill="#000"/>
+    
+    <!-- Botones -->
+    <circle cx="150" cy="35" r="8" fill="#FF6B6B"/>
+    <circle cx="170" cy="55" r="8" fill="#4ECDC4"/>
+    <circle cx="150" cy="75" r="8" fill="#45B7D1"/>
+    <circle cx="130" cy="55" r="8" fill="#96CEB4"/>
+    
+    <!-- Sticks -->
+    <circle cx="60" cy="85" r="15" fill="#333"/>
+    <circle cx="60" cy="85" r="10" fill="#666"/>
+    <circle cx="140" cy="95" r="15" fill="#333"/>
+    <circle cx="140" cy="95" r="10" fill="#666"/>
+  </g>
+  
+  <!-- Título principal -->
+  <text x="350" y="220" font-family="Arial Black, sans-serif" font-size="80" font-weight="900" fill="url(#textGradient)" filter="url(#textShadow)">🎮 JUEGUITOS</text>
+  
+  <!-- Subtítulo -->
+  <text x="350" y="300" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#84CC16" filter="url(#textShadow)">Si no vas a competir ni juegues</text>
+  
+  <!-- Descripción -->
+  <text x="350" y="360" font-family="Arial, sans-serif" font-size="28" fill="#06B6D4">Colección de juegos divertidos y desafiantes</text>
+  <text x="350" y="400" font-family="Arial, sans-serif" font-size="28" fill="#8B5CF6">Adivina países, compite y diviértete</text>
+  
+  <!-- Efectos decorativos adicionales -->
+  <rect x="350" y="430" width="60" height="8" rx="4" fill="#84CC16"/>
+  <rect x="420" y="430" width="40" height="8" rx="4" fill="#06B6D4"/>
+  <rect x="470" y="430" width="80" height="8" rx="4" fill="#8B5CF6"/>
+  
+  <!-- Píxeles decorativos -->
+  <rect x="300" y="180" width="8" height="8" fill="#84CC16"/>
+  <rect x="320" y="180" width="8" height="8" fill="#06B6D4"/>
+  <rect x="300" y="200" width="8" height="8" fill="#8B5CF6"/>
+  <rect x="320" y="200" width="8" height="8" fill="#F59E0B"/>
+  
+  <rect x="1100" y="480" width="8" height="8" fill="#84CC16"/>
+  <rect x="1120" y="480" width="8" height="8" fill="#06B6D4"/>
+  <rect x="1100" y="500" width="8" height="8" fill="#8B5CF6"/>
+  <rect x="1120" y="500" width="8" height="8" fill="#F59E0B"/>
+</svg>

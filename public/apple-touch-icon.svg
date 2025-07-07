@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <defs>
+    <linearGradient id="controllerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="25%" style="stop-color:#A855F7;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#06B6D4;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#22D3EE;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#84CC16;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+  </defs>
+  
+  <!-- Fondo redondeado para iOS -->
+  <rect width="180" height="180" rx="40" ry="40" fill="#1a1a2e"/>
+  
+  <!-- Efectos de fondo -->
+  <rect width="180" height="180" rx="40" ry="40" fill="url(#controllerGradient)" opacity="0.1"/>
+  
+  <!-- Cuerpo principal del joystick -->
+  <rect x="30" y="70" width="120" height="70" rx="35" ry="35" fill="url(#controllerGradient)" stroke="#000" stroke-width="3" filter="url(#shadow)"/>
+  
+  <!-- D-pad (izquierda) -->
+  <rect x="50" y="95" width="20" height="6" rx="3" fill="#000"/>
+  <rect x="57" y="88" width="6" height="20" rx="3" fill="#000"/>
+  
+  <!-- Botones de acción (derecha) -->
+  <circle cx="120" cy="85" r="6" fill="#FF6B6B" stroke="#000" stroke-width="2"/>
+  <circle cx="135" cy="100" r="6" fill="#4ECDC4" stroke="#000" stroke-width="2"/>
+  <circle cx="120" cy="115" r="6" fill="#45B7D1" stroke="#000" stroke-width="2"/>
+  <circle cx="105" cy="100" r="6" fill="#96CEB4" stroke="#000" stroke-width="2"/>
+  
+  <!-- Sticks analógicos -->
+  <circle cx="65" cy="120" r="10" fill="#333" stroke="#000" stroke-width="2"/>
+  <circle cx="65" cy="120" r="6" fill="#666"/>
+  
+  <circle cx="125" cy="130" r="10" fill="#333" stroke="#000" stroke-width="2"/>
+  <circle cx="125" cy="130" r="6" fill="#666"/>
+  
+  <!-- Detalles adicionales -->
+  <rect x="80" y="75" width="20" height="4" rx="2" fill="#333"/>
+  <rect x="80" y="135" width="20" height="4" rx="2" fill="#333"/>
+  
+  <!-- Efectos de brillo -->
+  <ellipse cx="90" cy="85" rx="30" ry="8" fill="rgba(255,255,255,0.4)"/>
+  
+  <!-- Letras en los botones -->
+  <text x="120" y="88" text-anchor="middle" fill="white" font-family="Arial Black" font-size="8" font-weight="bold">A</text>
+  <text x="135" y="103" text-anchor="middle" fill="white" font-family="Arial Black" font-size="8" font-weight="bold">B</text>
+  <text x="120" y="118" text-anchor="middle" fill="white" font-family="Arial Black" font-size="8" font-weight="bold">X</text>
+  <text x="105" y="103" text-anchor="middle" fill="white" font-family="Arial Black" font-size="8" font-weight="bold">Y</text>
+</svg>

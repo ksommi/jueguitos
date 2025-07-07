@@ -15,8 +15,60 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
 	title: "🎮 Jueguitos - Si no vas a competir ni juegues",
 	description:
-		"Colección de juegos divertidos y desafiantes. Adivina países, compite y diviértete.",
-	keywords: "juegos, games, arcade, retro, gaming, competencia",
+		"Colección de juegos divertidos y desafiantes. Adivina países, compite y diviértete en esta arcade retro.",
+	keywords:
+		"juegos, games, arcade, retro, gaming, competencia, geografía, países",
+	authors: [{ name: "Jueguitos" }],
+	icons: {
+		icon: [
+			{ url: "/favicon.svg", type: "image/svg+xml" },
+			{ url: "/favicon.ico", sizes: "any" },
+		],
+		apple: [
+			{
+				url: "/apple-touch-icon.svg",
+				sizes: "180x180",
+				type: "image/svg+xml",
+			},
+		],
+	},
+	openGraph: {
+		title: "🎮 Jueguitos - Si no vas a competir ni juegues",
+		description:
+			"Colección de juegos divertidos y desafiantes. Adivina países, compite y diviértete en esta arcade retro.",
+		type: "website",
+		locale: "es_ES",
+		siteName: "Jueguitos",
+		images: [
+			{
+				url: "/og-image.svg",
+				width: 1200,
+				height: 630,
+				alt: "Jueguitos - Arcade Games Retro",
+			},
+		],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: "🎮 Jueguitos - Si no vas a competir ni juegues",
+		description:
+			"Colección de juegos divertidos y desafiantes. Adivina países, compite y diviértete en esta arcade retro.",
+		images: ["/og-image.svg"],
+	},
+	robots: {
+		index: true,
+		follow: true,
+	},
+	applicationName: "Jueguitos",
+	generator: "Next.js",
+	referrer: "origin-when-cross-origin",
+	creator: "Jueguitos Team",
+	publisher: "Jueguitos",
+	formatDetection: {
+		email: false,
+		address: false,
+		telephone: false,
+	},
 };
 
 export default function RootLayout({
