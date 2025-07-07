@@ -1,26 +1,96 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+	--background: #ffffff;
+	--foreground: #171717;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--font-sans: var(--font-geist-sans);
+	--font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+	:root {
+		--background: #0a0a0a;
+		--foreground: #ededed;
+	}
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+	background: var(--background);
+	color: var(--foreground);
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Estilos 8-bit y retro gaming */
+.pixel-font {
+	font-family: "Courier New", "Monaco", "Menlo", monospace;
+	text-shadow: 2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000,
+		-2px 2px 0px #000;
+}
+
+.pixel-text {
+	font-family: "Courier New", "Monaco", "Menlo", monospace;
+	text-shadow: 1px 1px 0px #000;
+}
+
+.pixel-title {
+	text-shadow: 1px 1px 0px #000, 2px 2px 0px rgba(0, 255, 255, 0.3);
+}
+
+.pixel-button {
+	clip-path: polygon(
+		10px 0,
+		100% 0,
+		100% calc(100% - 10px),
+		calc(100% - 10px) 100%,
+		0 100%,
+		0 10px
+	);
+	text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+}
+
+.pixel-border {
+	border-style: solid;
+	border-image: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff) 1;
+}
+
+.pixel-emoji {
+	filter: contrast(1.2) saturate(1.3);
+	text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Animación de interferencia retro */
+@keyframes glitch {
+	0% {
+		transform: translate(0);
+	}
+	20% {
+		transform: translate(-2px, 2px);
+	}
+	40% {
+		transform: translate(-2px, -2px);
+	}
+	60% {
+		transform: translate(2px, 2px);
+	}
+	80% {
+		transform: translate(2px, -2px);
+	}
+	100% {
+		transform: translate(0);
+	}
+}
+
+.glitch:hover {
+	animation: glitch 0.3s linear infinite;
+}
+
+/* Efecto de pantalla CRT */
+.crt-effect {
+	background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.03) 50%);
+	background-size: 100% 4px;
 }

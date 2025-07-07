@@ -342,12 +342,13 @@ export function getTodayDateString(): string {
 	const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
 	const utcDate = new Date(utcTime);
 
+	// Formato argentino: d-m-Y
 	return (
-		utcDate.getFullYear() +
+		String(utcDate.getDate()).padStart(2, "0") +
 		"-" +
 		String(utcDate.getMonth() + 1).padStart(2, "0") +
 		"-" +
-		String(utcDate.getDate()).padStart(2, "0")
+		utcDate.getFullYear()
 	);
 }
 
@@ -530,7 +531,7 @@ export function generateShareText(
 ): string {
 	const today = getTodayDateString();
 
-	let result = `🌍 Adivinar País ${today}\n`;
+	let result = `🌍 Guiate ${today}\n`;
 	result += won ? `✅ ${attempts} intentos` : `❌ ${attempts} intentos`;
 	result += "\n\n";
 
@@ -545,7 +546,7 @@ export function generateShareText(
 		}
 	});
 
-	result += "\n\n🎮 ¡Juega en: https://jueguitos.vercel.app/guiate";
+	result += "\n\n🎮 ¡Jugá en: https://jueguitos-psi.vercel.app/guiate";
 	return result;
 }
 

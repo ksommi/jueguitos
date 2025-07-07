@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Country } from "@/lib/countries";
 import { searchCountriesGeo } from "@/lib/geoData";
 
@@ -19,8 +20,31 @@ export default function CountryInput({
 	const [suggestions, setSuggestions] = useState<Country[]>([]);
 	const [showSuggestions, setShowSuggestions] = useState(false);
 	const [selectedIndex, setSelectedIndex] = useState(-1);
+	const [dropdownPosition, setDropdownPosition] = useState({
+		top: 0,
+		left: 0,
+		width: 0,
+	});
+	const [mounted, setMounted] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const suggestionsRef = useRef<HTMLDivElement>(null);
+
+	// Solo renderizar en el cliente
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	// Calcular posición del dropdown
+	const updateDropdownPosition = () => {
+		if (inputRef.current) {
+			const rect = inputRef.current.getBoundingClientRect();
+			setDropdownPosition({
+				top: rect.bottom + window.scrollY + 4, // 4px de margen
+				left: rect.left + window.scrollX,
+				width: rect.width,
+			});
+		}
+	};
 
 	useEffect(() => {
 		if (query.trim().length >= 3) {
@@ -31,6 +55,13 @@ export default function CountryInput({
 			setSuggestions(results);
 			setShowSuggestions(true);
 			setSelectedIndex(-1);
+			updateDropdownPosition();
+		} else if (query.trim().length > 0) {
+			// Mostrar mensaje de "escribe al menos 3 letras"
+			setSuggestions([]);
+			setShowSuggestions(true);
+			setSelectedIndex(-1);
+			updateDropdownPosition();
 		} else {
 			setSuggestions([]);
 			setShowSuggestions(false);
@@ -74,6 +105,29 @@ export default function CountryInput({
 		inputRef.current?.focus();
 	};
 
+	// Actualizar posición en scroll/resize
+	useEffect(() => {
+		const handleResize = () => {
+			if (showSuggestions) {
+				updateDropdownPosition();
+			}
+		};
+
+		const handleScroll = () => {
+			if (showSuggestions) {
+				updateDropdownPosition();
+			}
+		};
+
+		window.addEventListener("resize", handleResize);
+		window.addEventListener("scroll", handleScroll);
+
+		return () => {
+			window.removeEventListener("resize", handleResize);
+			window.removeEventListener("scroll", handleScroll);
+		};
+	}, [showSuggestions]);
+
 	const handleClickOutside = (e: Event) => {
 		if (
 			suggestionsRef.current &&
@@ -93,6 +147,55 @@ export default function CountryInput({
 		};
 	}, []);
 
+	// Componente del dropdown que se renderizará como portal
+	const DropdownPortal = () => {
+		if (!mounted || !showSuggestions || disabled) return null;
+
+		const content = (
+			<div
+				ref={suggestionsRef}
+				className="fixed z-[99999] bg-gray-900/95 backdrop-blur-sm border-2 border-cyan-400/50 shadow-2xl max-h-60 overflow-y-auto"
+				style={{
+					top: `${dropdownPosition.top}px`,
+					left: `${dropdownPosition.left}px`,
+					width: `${dropdownPosition.width}px`,
+				}}
+			>
+				{suggestions.length > 0 ? (
+					suggestions.map((country, index) => (
+						<button
+							key={`${country.code}-${country.name}-${index}`}
+							onClick={() => handleSelectCountry(country)}
+							className={`
+								w-full text-left px-4 py-3 hover:bg-cyan-400/20 transition-colors border-b border-cyan-400/20 last:border-b-0 font-mono
+								${index === selectedIndex ? "bg-lime-400/20 border-lime-400/30" : ""}
+							`}
+						>
+							<div className="flex items-center space-x-3">
+								<span className="font-medium text-cyan-300">
+									{country.name}
+								</span>
+							</div>
+						</button>
+					))
+				) : query.trim().length >= 3 ? (
+					<div className="px-4 py-3 text-cyan-500 italic text-center font-mono">
+						&gt; No se encontraron países: &quot;{query}&quot;
+					</div>
+				) : null}
+
+				{/* Mensaje cuando hay menos de 3 letras */}
+				{query.trim().length > 0 && query.trim().length < 3 && (
+					<div className="px-4 py-3 text-purple-400 text-center text-sm font-mono border-purple-400/50">
+						&gt; Escribe al menos 3 letras...
+					</div>
+				)}
+			</div>
+		);
+
+		return createPortal(content, document.body);
+	};
+
 	return (
 		<div className="relative">
 			<div className="relative">
@@ -102,6 +205,12 @@ export default function CountryInput({
 					value={query}
 					onChange={handleInputChange}
 					onKeyDown={handleKeyDown}
+					onFocus={() => {
+						if (query.trim().length >= 3) {
+							setShowSuggestions(true);
+							updateDropdownPosition();
+						}
+					}}
 					disabled={disabled}
 					placeholder={
 						disabled
@@ -109,11 +218,11 @@ export default function CountryInput({
 							: "Escribe el nombre de un país..."
 					}
 					className={`
-            w-full px-4 py-3 text-lg border-2 rounded-lg focus:outline-none focus:ring-2 transition-all
+            w-full px-4 py-3 text-lg border-2 focus:outline-none focus:ring-2 transition-all font-mono
             ${
 					disabled
-						? "bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-						: "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-200 dark:focus:ring-blue-800"
+						? "bg-gray-900/50 border-gray-600/50 text-gray-500 cursor-not-allowed backdrop-blur-sm"
+						: "border-cyan-400/50 bg-gray-900/70 backdrop-blur-sm text-cyan-300 focus:border-lime-400 focus:ring-lime-400/20 placeholder-cyan-500/50"
 				}
           `}
 				/>
@@ -121,55 +230,13 @@ export default function CountryInput({
 					{disabled ? (
 						<span className="text-2xl">🏆</span>
 					) : (
-						<span className="text-gray-400 text-xl">🌍</span>
+						<span className="text-cyan-400 text-xl">🌍</span>
 					)}
 				</div>
 			</div>
 
-			{showSuggestions && suggestions.length > 0 && !disabled && (
-				<div
-					ref={suggestionsRef}
-					className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-				>
-					{suggestions.map((country, index) => (
-						<button
-							key={`${country.code}-${country.name}-${index}`}
-							onClick={() => handleSelectCountry(country)}
-							className={`
-                w-full text-left px-4 py-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0
-                ${
-							index === selectedIndex
-								? "bg-blue-100 dark:bg-blue-900/40"
-								: ""
-						}
-              `}
-						>
-							<div className="flex items-center space-x-3">
-								<span className="text-lg">🌍</span>
-								<span className="font-medium text-gray-800 dark:text-white">
-									{country.name}
-								</span>
-							</div>
-						</button>
-					))}
-
-					{query.trim().length >= 3 && suggestions.length === 0 && (
-						<div className="px-4 py-3 text-gray-500 dark:text-gray-400 italic text-center">
-							No se encontraron países que coincidan con &ldquo;{query}
-							&rdquo;
-						</div>
-					)}
-				</div>
-			)}
-
-			{/* Mensaje cuando hay menos de 3 letras */}
-			{query.trim().length > 0 && query.trim().length < 3 && !disabled && (
-				<div className="absolute z-10 w-full mt-1 bg-gray-50 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg shadow-lg px-4 py-3">
-					<div className="text-gray-500 dark:text-gray-400 text-center text-sm">
-						Escribe al menos 3 letras para buscar países...
-					</div>
-				</div>
-			)}
+			{/* Renderizar dropdown como portal */}
+			<DropdownPortal />
 		</div>
 	);
 }

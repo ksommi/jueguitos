@@ -281,14 +281,14 @@ export default function AdivinarPaisPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-			{/* Header compacto para móvil */}
-			<div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm shadow-sm">
+		<div className="min-h-screen relative">
+			{/* Header compacto con estética gamer */}
+			<div className="sticky top-0 z-10 bg-gray-900/90 backdrop-blur-sm shadow-lg border-b-2 border-cyan-400/30">
 				<div className="container mx-auto px-4 py-3">
 					<div className="flex items-center justify-between">
 						<Link
 							href="/"
-							className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
+							className="flex items-center space-x-2 text-cyan-400 hover:text-lime-400 transition-colors font-mono"
 						>
 							<svg
 								className="w-5 h-5"
@@ -303,26 +303,26 @@ export default function AdivinarPaisPage() {
 									d="M15 19l-7-7 7-7"
 								/>
 							</svg>
-							<span className="font-medium text-sm md:text-base">
-								Volver
+							<span className="font-medium text-sm md:text-base tracking-wider">
+								&lt; VOLVER
 							</span>
 						</Link>
 
-						<h1 className="text-lg md:text-2xl font-bold text-gray-800 dark:text-white">
-							🌍 Adivinar País
+						<h1 className="text-lg md:text-2xl font-bold text-white font-mono tracking-wider pixel-title">
+							🌍 <span className="text-cyan-400">GUIATE</span>
 						</h1>
 
 						<div className="flex space-x-2">
 							<button
 								onClick={() => setShowStats(!showStats)}
-								className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+								className="px-3 py-2 bg-cyan-600/80 backdrop-blur-sm text-white font-mono hover:bg-lime-500/80 transition-colors font-medium text-sm border border-cyan-400/50 hover:border-lime-400"
 							>
 								📊
 							</button>
 							{process.env.NODE_ENV === "development" && (
 								<button
 									onClick={startNewGame}
-									className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+									className="px-3 py-2 bg-purple-600/80 backdrop-blur-sm text-white font-mono hover:bg-purple-500/80 transition-colors font-medium text-sm border border-purple-400/50"
 								>
 									🔄
 								</button>
@@ -333,122 +333,141 @@ export default function AdivinarPaisPage() {
 			</div>
 
 			<div className="container mx-auto px-4 py-4 space-y-4">
-				{/* Input para adivinar - Primera prioridad en móvil */}
-				<div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-					<div className="max-w-2xl mx-auto">
+				{/* Input para adivinar - Estilo gamer */}
+				<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-cyan-400/50 shadow-xl relative overflow-hidden p-4">
+					{/* Efectos de scanline sutiles */}
+					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/5 to-transparent opacity-50 pointer-events-none"></div>
+
+					<div className="max-w-2xl mx-auto relative z-10">
 						<CountryInput
 							onGuess={handleGuess}
 							disabled={gameWon || gameCompleted}
 							alreadyGuessed={alreadyGuessed}
 						/>
 					</div>
+
+					{/* Píxeles decorativos */}
+					<div className="absolute top-2 left-2 w-2 h-2 bg-cyan-400 animate-pulse"></div>
+					<div className="absolute top-2 right-2 w-2 h-2 bg-lime-400 animate-pulse delay-500"></div>
 				</div>
 
-				{/* Estado del juego */}
+				{/* Estado del juego - Estilo gamer */}
 				{gameWon ? (
-					<div className="bg-green-100 dark:bg-green-900 border-2 border-green-300 dark:border-green-600 rounded-lg p-4">
-						<h2 className="text-lg md:text-xl font-bold text-green-800 dark:text-green-200 mb-2 text-center">
-							🎉 ¡Felicitaciones!
-						</h2>
-						<p className="text-green-700 dark:text-green-300 text-center mb-4">
-							¡Adivinaste{" "}
-							<span className="font-bold">{targetCountry.name}</span> en{" "}
-							{attempts} intentos!
-						</p>
+					<div className="bg-gray-900/90 backdrop-blur-sm border-2 border-lime-400 shadow-xl relative overflow-hidden p-4">
+						{/* Efecto de celebración */}
+						<div className="absolute inset-0 bg-gradient-to-r from-lime-400/10 via-cyan-400/10 to-purple-400/10 animate-pulse"></div>
 
-						{/* Estadísticas rápidas */}
-						{gameStats && (
-							<div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-4">
-								<div className="grid grid-cols-3 gap-4 text-center">
-									<div>
-										<div className="text-lg font-bold text-green-600">
-											{gameStats.gamesPlayed}
+						<div className="relative z-10">
+							<h2 className="text-lg md:text-xl font-bold text-lime-400 mb-2 text-center font-mono tracking-wider pixel-title">
+								🎉 ¡VICTORIA CONSEGUIDA!
+							</h2>
+							<p className="text-cyan-300 text-center mb-4 font-mono">
+								¡Completaste{" "}
+								<span className="font-bold text-white">
+									{targetCountry.name}
+								</span>{" "}
+								en {attempts} intentos!
+							</p>
+
+							{/* Estadísticas rápidas con estilo retro */}
+							{gameStats && (
+								<div className="bg-black/50 backdrop-blur-sm border border-cyan-400/30 p-3 mb-4">
+									<div className="grid grid-cols-3 gap-4 text-center">
+										<div>
+											<div className="text-lg font-bold text-lime-400 font-mono">
+												{gameStats.gamesPlayed}
+											</div>
+											<div className="text-xs text-cyan-300 font-mono">
+												JUGADOS
+											</div>
 										</div>
-										<div className="text-xs text-gray-600 dark:text-gray-400">
-											Jugados
+										<div>
+											<div className="text-lg font-bold text-cyan-400 font-mono">
+												{gameStats.averageGuesses}
+											</div>
+											<div className="text-xs text-cyan-300 font-mono">
+												Promedio
+											</div>
 										</div>
-									</div>
-									<div>
-										<div className="text-lg font-bold text-blue-600">
-											{gameStats.averageGuesses}
-										</div>
-										<div className="text-xs text-gray-600 dark:text-gray-400">
-											Promedio
-										</div>
-									</div>
-									<div>
-										<div className="text-lg font-bold text-green-600">
-											{gameStats.currentStreak}
-										</div>
-										<div className="text-xs text-gray-600 dark:text-gray-400">
-											Racha
+										<div>
+											<div className="text-lg font-bold text-purple-400 font-mono">
+												{gameStats.currentStreak}
+											</div>
+											<div className="text-xs text-cyan-300 font-mono">
+												RACHA
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-						)}
+							)}
 
-						{/* Botones de compartir */}
-						<div className="grid grid-cols-2 gap-3 mb-3">
-							<button
-								onClick={shareOnWhatsApp}
-								className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
-							>
-								<span>📱</span>
-								<span>WhatsApp</span>
-							</button>{" "}
-							<button
-								onClick={copyToClipboard}
-								className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-							>
-								<span>📋</span>
-								<span>Copiar</span>
-							</button>
+							{/* Botones de compartir con estilo arcade */}
+							<div className="grid grid-cols-2 gap-3 mb-3">
+								<button
+									onClick={shareOnWhatsApp}
+									className="flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-lime-500 to-green-500 text-black font-mono font-bold transition-colors pixel-button"
+								>
+									<span>📱</span>
+									<span>WHATSAPP</span>
+								</button>
+								<button
+									onClick={copyToClipboard}
+									className="flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black font-mono font-bold transition-colors pixel-button"
+								>
+									<span>📋</span>
+									<span>COPIAR</span>
+								</button>
+							</div>
+
+							{process.env.NODE_ENV === "development" && (
+								<button
+									onClick={startNewGame}
+									className="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-black font-mono font-bold transition-colors pixel-button"
+								>
+									🔄 REINICIAR
+								</button>
+							)}
 						</div>
 
-						{process.env.NODE_ENV === "development" && (
-							<button
-								onClick={startNewGame}
-								className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 transition-colors font-medium"
-							>
-								🔄 Reiniciar
-							</button>
-						)}
+						{/* Píxeles de celebración */}
+						<div className="absolute top-2 left-2 w-3 h-3 bg-lime-400 animate-ping"></div>
+						<div className="absolute top-2 right-2 w-3 h-3 bg-cyan-400 animate-ping delay-300"></div>
+						<div className="absolute bottom-2 left-2 w-3 h-3 bg-purple-400 animate-ping delay-600"></div>
+						<div className="absolute bottom-2 right-2 w-3 h-3 bg-pink-400 animate-ping delay-900"></div>
 					</div>
 				) : (
-					<div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-						<p className="text-sm md:text-base text-gray-700 dark:text-gray-300 mb-3 text-center">
-							Adivina el país secreto. Los colores indican qué tan cerca
-							estás.
-						</p>
-						<div className="flex justify-center items-center space-x-4 text-xs md:text-sm">
-							<div className="flex items-center space-x-1">
-								<div className="w-3 h-3 bg-red-600 rounded-full"></div>
-								<span className="text-gray-700 dark:text-gray-300">
-									Cerca
-								</span>
-							</div>
-							<div className="flex items-center space-x-1">
-								<div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-								<span className="text-gray-700 dark:text-gray-300">
-									Lejos
-								</span>
-							</div>
-							<div className="flex items-center space-x-1">
-								<div className="w-3 h-3 bg-yellow-300 rounded-full"></div>
-								<span className="text-gray-700 dark:text-gray-300">
-									Muy lejos
-								</span>
+					<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-purple-400/50 shadow-xl relative overflow-hidden p-4">
+						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-400/5 to-transparent opacity-50 pointer-events-none"></div>
+
+						<div className="relative z-10">
+							<p className="text-sm md:text-base text-cyan-300 mb-3 text-center font-mono">
+								&gt; Adivina el país secreto
+							</p>
+							<div className="flex justify-center items-center space-x-4 text-xs md:text-sm font-mono">
+								<div className="flex items-center space-x-1">
+									<div className="w-3 h-3 bg-red-600"></div>
+									<span className="text-cyan-300">CERCA</span>
+								</div>
+								<div className="flex items-center space-x-1">
+									<div className="w-3 h-3 bg-yellow-500"></div>
+									<span className="text-cyan-300">LEJOS</span>
+								</div>
+								<div className="flex items-center space-x-1">
+									<div className="w-3 h-3 bg-yellow-300"></div>
+									<span className="text-cyan-300">Muy lejos</span>
+								</div>
 							</div>
 						</div>
 					</div>
 				)}
 
-				{/* Mapa y Lista - Layout responsivo */}
+				{/* Mapa y Lista - Layout responsivo con estilo gamer */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-					{/* Mapa - Tamaño optimizado para móvil y desktop */}
-					<div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-600">
-						<div className="h-[300px] md:h-[400px] lg:h-[500px] w-full">
+					{/* Mapa - Estilo cyberpunk */}
+					<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-cyan-400/50 shadow-xl relative overflow-hidden p-4">
+						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/5 to-transparent opacity-50 pointer-events-none"></div>
+
+						<div className="h-[300px] md:h-[400px] lg:h-[500px] w-full relative z-10">
 							<GameMap
 								targetCountry={targetCountry}
 								guessedCountries={guesses}
@@ -459,163 +478,210 @@ export default function AdivinarPaisPage() {
 							/>
 						</div>
 						{!mapReady && (
-							<div className="text-center mt-2 text-gray-500 dark:text-gray-400 text-sm">
-								<p>Cargando mapa...</p>
+							<div className="text-center mt-2 text-cyan-400 text-sm font-mono relative z-10">
+								<p>&gt; Cargando mapa...</p>
+								<div className="flex justify-center mt-1">
+									<div className="w-2 h-2 bg-cyan-400 animate-bounce mr-1"></div>
+									<div className="w-2 h-2 bg-cyan-400 animate-bounce delay-100 mr-1"></div>
+									<div className="w-2 h-2 bg-cyan-400 animate-bounce delay-200"></div>
+								</div>
 							</div>
 						)}
+
+						{/* Píxeles decorativos */}
+						<div className="absolute top-2 left-2 w-2 h-2 bg-cyan-400 animate-pulse"></div>
+						<div className="absolute top-2 right-2 w-2 h-2 bg-lime-400 animate-pulse delay-500"></div>
+						<div className="absolute bottom-2 left-2 w-2 h-2 bg-purple-400 animate-pulse delay-1000"></div>
+						<div className="absolute bottom-2 right-2 w-2 h-2 bg-pink-400 animate-pulse delay-300"></div>
 					</div>
 
-					{/* Lista de intentos */}
-					<div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 lg:h-[568px] lg:overflow-hidden lg:flex lg:flex-col">
-						<GuessList
-							guesses={guesses}
-							onCountryHover={handleCountryHover}
-							onCountryClick={handleCountryListClick}
-							highlightedCountry={highlightedCountry}
-						/>
+					{/* Lista de intentos con estilo retro */}
+					<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-purple-400/50 shadow-xl relative overflow-hidden lg:h-[568px] lg:flex lg:flex-col">
+						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-400/5 to-transparent opacity-50 pointer-events-none"></div>
+
+						<div className="relative z-10 flex-1 overflow-hidden">
+							<GuessList
+								guesses={guesses}
+								onCountryHover={handleCountryHover}
+								onCountryClick={handleCountryListClick}
+								highlightedCountry={highlightedCountry}
+							/>
+						</div>
+
+						{/* Píxeles decorativos */}
+						<div className="absolute top-2 left-2 w-2 h-2 bg-purple-400 animate-pulse"></div>
+						<div className="absolute top-2 right-2 w-2 h-2 bg-cyan-400 animate-pulse delay-700"></div>
 					</div>
 				</div>
 
-				{/* Estadísticas compactas */}
+				{/* Estadísticas compactas con estilo arcade */}
 				<div className="grid grid-cols-3 gap-3">
-					<div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 text-center">
-						<div className="text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
-							{attempts}
+					<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-cyan-400/50 shadow-xl relative overflow-hidden p-3 text-center">
+						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent opacity-50 pointer-events-none"></div>
+						<div className="relative z-10">
+							<div className="text-xl md:text-2xl font-bold text-cyan-400 font-mono">
+								{attempts}
+							</div>
+							<div className="text-xs md:text-sm text-cyan-300 font-mono">
+								INTENTOS
+							</div>
 						</div>
-						<div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
-							Intentos
-						</div>
+						<div className="absolute top-1 left-1 w-1 h-1 bg-cyan-400"></div>
+						<div className="absolute top-1 right-1 w-1 h-1 bg-cyan-400"></div>
 					</div>
-					<div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 text-center">
-						<div className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400">
-							{bestDistance === Infinity
-								? "∞"
-								: `${Math.round(bestDistance / 1000)}k`}
+					<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-lime-400/50 shadow-xl relative overflow-hidden p-3 text-center">
+						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-lime-400/10 to-transparent opacity-50 pointer-events-none"></div>
+						<div className="relative z-10">
+							<div className="text-xl md:text-2xl font-bold text-lime-400 font-mono">
+								{bestDistance === Infinity
+									? "∞"
+									: `${Math.round(bestDistance / 1000)}k`}
+							</div>
+							<div className="text-xs md:text-sm text-lime-300 font-mono">
+								Mejor km
+							</div>
 						</div>
-						<div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
-							Mejor (km)
-						</div>
+						<div className="absolute top-1 left-1 w-1 h-1 bg-lime-400"></div>
+						<div className="absolute top-1 right-1 w-1 h-1 bg-lime-400"></div>
 					</div>
-					<div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 text-center">
-						<div className="text-xl md:text-2xl font-bold text-purple-600 dark:text-purple-400">
-							{guesses.length}
+					<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-purple-400/50 shadow-xl relative overflow-hidden p-3 text-center">
+						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-400/10 to-transparent opacity-50 pointer-events-none"></div>
+						<div className="relative z-10">
+							<div className="text-xl md:text-2xl font-bold text-purple-400 font-mono">
+								{guesses.length}
+							</div>
+							<div className="text-xs md:text-sm text-purple-300 font-mono">
+								Países
+							</div>
 						</div>
-						<div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
-							Países
-						</div>
+						<div className="absolute top-1 left-1 w-1 h-1 bg-purple-400"></div>
+						<div className="absolute top-1 right-1 w-1 h-1 bg-purple-400"></div>
 					</div>
 				</div>
 
-				{/* Instrucciones - Minimizadas para móvil */}
-				<details className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-					<summary className="p-4 cursor-pointer font-bold text-gray-800 dark:text-white text-center">
-						📖 Cómo Jugar (toca para expandir)
+				{/* Instrucciones - Estilo terminal */}
+				<details className="bg-gray-900/80 backdrop-blur-sm border-2 border-lime-400/50 shadow-xl relative overflow-hidden">
+					<summary className="p-4 cursor-pointer font-bold text-lime-400 text-center font-mono tracking-wider hover:text-cyan-400 transition-colors">
+						📖 &gt; Cómo jugar [expandir]
 					</summary>
-					<div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
-						<div>
-							<h4 className="font-semibold mb-1 text-gray-800 dark:text-white">
-								🎯 Objetivo
+					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-lime-400/5 to-transparent opacity-50 pointer-events-none"></div>
+					<div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-cyan-300 relative z-10">
+						<div className="bg-black/30 p-3 border border-cyan-400/30">
+							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
+								🎯 OBJETIVO
 							</h4>
-							<p>
-								Adivina el país secreto en la menor cantidad de intentos
-								posible.
+							<p className="font-mono text-xs">
+								&gt; Adivina el país secreto en la menor cantidad de
+								intentos posible.
 							</p>
 						</div>
-						<div>
-							<h4 className="font-semibold mb-1 text-gray-800 dark:text-white">
-								🎨 Colores
+						<div className="bg-black/30 p-3 border border-cyan-400/30">
+							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
+								🎨 COLORES
 							</h4>
-							<p>
-								Los países aparecen en el mapa con colores según su
-								distancia al país secreto.
+							<p className="font-mono text-xs">
+								&gt; Los países aparecen en el mapa con colores según su
+								distancia.
 							</p>
 						</div>
-						<div>
-							<h4 className="font-semibold mb-1 text-gray-800 dark:text-white">
-								📏 Distancia
+						<div className="bg-black/30 p-3 border border-cyan-400/30">
+							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
+								📏 DISTANCIA
 							</h4>
-							<p>
-								La lista muestra todos tus intentos ordenados de más
-								cerca a más lejos.
+							<p className="font-mono text-xs">
+								&gt; La lista muestra todos tus intentos ordenados de
+								más cerca a más lejos.
 							</p>
 						</div>
-						<div>
-							<h4 className="font-semibold mb-1 text-gray-800 dark:text-white">
-								⌨️ Controles
+						<div className="bg-black/30 p-3 border border-cyan-400/30">
+							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
+								⌨️ CONTROLES
 							</h4>
-							<p>
-								Escribe el nombre del país y usa las flechas para
-								navegar las sugerencias.
+							<p className="font-mono text-xs">
+								&gt; Escribe el nombre del país y usa las flechas para
+								navegar.
 							</p>
 						</div>
 					</div>
 				</details>
 
-				{/* Modal de estadísticas */}
+				{/* Modal de estadísticas - Estilo cyberpunk */}
 				{showStats && gameStats && (
-					<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
-						<div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
-							<div className="flex justify-between items-center mb-4">
-								<h2 className="text-xl font-bold text-gray-800 dark:text-white">
-									📊 Estadísticas
-								</h2>
+					<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+						<div className="bg-gray-900/95 backdrop-blur-sm border-2 border-cyan-400 shadow-2xl max-w-md w-full relative overflow-hidden">
+							{/* Efectos de scanline */}
+							<div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent opacity-50 pointer-events-none"></div>
+
+							<div className="relative z-10 p-6">
+								<div className="flex justify-between items-center mb-4">
+									<h2 className="text-xl font-bold text-cyan-400 font-mono tracking-wider">
+										📊 &gt; ESTADÍSTICAS
+									</h2>
+									<button
+										onClick={() => setShowStats(false)}
+										className="text-lime-400 hover:text-cyan-400 text-2xl font-mono transition-colors"
+									>
+										[X]
+									</button>
+								</div>
+
+								<div className="grid grid-cols-2 gap-4 mb-6">
+									<div className="text-center bg-black/50 p-3 border border-cyan-400/30">
+										<div className="text-2xl font-bold text-cyan-400 font-mono">
+											{gameStats.gamesPlayed}
+										</div>
+										<div className="text-sm text-cyan-300 font-mono">
+											Partidas jugadas
+										</div>
+									</div>
+									<div className="text-center bg-black/50 p-3 border border-lime-400/30">
+										<div className="text-2xl font-bold text-lime-400 font-mono">
+											{gameStats.averageGuesses}
+										</div>
+										<div className="text-sm text-lime-300 font-mono">
+											Promedio intentos
+										</div>
+									</div>
+									<div className="text-center bg-black/50 p-3 border border-purple-400/30">
+										<div className="text-2xl font-bold text-purple-400 font-mono">
+											{gameStats.currentStreak}
+										</div>
+										<div className="text-sm text-purple-300 font-mono">
+											Racha actual
+										</div>
+									</div>
+									<div className="text-center bg-black/50 p-3 border border-pink-400/30">
+										<div className="text-2xl font-bold text-pink-400 font-mono">
+											{gameStats.maxStreak}
+										</div>
+										<div className="text-sm text-pink-300 font-mono">
+											Mejor racha
+										</div>
+									</div>
+								</div>
+
+								{gameStats.averageGuesses > 0 && (
+									<div className="text-center mb-4 bg-black/50 p-3 border border-cyan-400/30">
+										<div className="text-lg font-bold text-cyan-300 font-mono">
+											&gt; Promedio: {gameStats.averageGuesses}{" "}
+											intentos
+										</div>
+									</div>
+								)}
+
 								<button
 									onClick={() => setShowStats(false)}
-									className="text-gray-500 hover:text-gray-700 text-2xl"
+									className="w-full px-4 py-2 bg-gradient-to-r from-cyan-500 to-lime-500 text-black font-mono font-bold tracking-wider transition-colors pixel-button"
 								>
-									×
+									&gt; Cerrar estadísticas
 								</button>
 							</div>
 
-							<div className="grid grid-cols-2 gap-4 mb-6">
-								<div className="text-center">
-									<div className="text-2xl font-bold text-blue-600">
-										{gameStats.gamesPlayed}
-									</div>
-									<div className="text-sm text-gray-600 dark:text-gray-400">
-										Partidas jugadas
-									</div>
-								</div>
-								<div className="text-center">
-									<div className="text-2xl font-bold text-blue-600">
-										{gameStats.averageGuesses}
-									</div>
-									<div className="text-sm text-gray-600 dark:text-gray-400">
-										Promedio intentos
-									</div>
-								</div>
-								<div className="text-center">
-									<div className="text-2xl font-bold text-purple-600">
-										{gameStats.currentStreak}
-									</div>
-									<div className="text-sm text-gray-600 dark:text-gray-400">
-										Racha actual
-									</div>
-								</div>
-								<div className="text-center">
-									<div className="text-2xl font-bold text-orange-600">
-										{gameStats.maxStreak}
-									</div>
-									<div className="text-sm text-gray-600 dark:text-gray-400">
-										Mejor racha
-									</div>
-								</div>
-							</div>
-
-							{gameStats.averageGuesses > 0 && (
-								<div className="text-center mb-4">
-									<div className="text-lg font-bold text-gray-700 dark:text-gray-300">
-										Promedio: {gameStats.averageGuesses} intentos
-									</div>
-								</div>
-							)}
-
-							<button
-								onClick={() => setShowStats(false)}
-								className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-							>
-								Cerrar
-							</button>
+							{/* Píxeles decorativos */}
+							<div className="absolute top-2 left-2 w-2 h-2 bg-cyan-400 animate-pulse"></div>
+							<div className="absolute top-2 right-2 w-2 h-2 bg-lime-400 animate-pulse delay-500"></div>
+							<div className="absolute bottom-2 left-2 w-2 h-2 bg-purple-400 animate-pulse delay-1000"></div>
+							<div className="absolute bottom-2 right-2 w-2 h-2 bg-pink-400 animate-pulse delay-300"></div>
 						</div>
 					</div>
 				)}
