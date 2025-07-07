@@ -9,6 +9,7 @@ export default function Home() {
 				"Adivina el país secreto usando pistas de ubicación en el mapa",
 			emoji: "🌍",
 			href: "/guiate",
+			disabled: false,
 		},
 	];
 
