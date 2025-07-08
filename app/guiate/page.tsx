@@ -10,12 +10,13 @@ import {
 	testSupabaseConnection,
 	DailyCountry,
 	User,
+	getRanking,
+	RankingEntry,
 } from "@/lib/supabase";
 import { Country, COUNTRIES, generateShareText } from "@/lib/countries";
 import { calculateDistanceCountries } from "@/lib/geoData";
 import { useAuth } from "@/components/AuthProvider";
 import { AuthModal } from "@/components/AuthProvider";
-import RankingModal from "@/components/RankingModal";
 
 import CountryInput from "@/components/CountryInput";
 import GuessList from "@/components/GuessList";
@@ -53,7 +54,8 @@ export default function GuiateGamePage() {
 	const [gameCompleted, setGameCompleted] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [showAuthModal, setShowAuthModal] = useState(false);
-	const [showRanking, setShowRanking] = useState(false);
+	const [ranking, setRanking] = useState<RankingEntry[]>([]);
+	const [rankingLoading, setRankingLoading] = useState(true);
 
 	// Inicializar el juego
 	useEffect(() => {
@@ -109,6 +111,23 @@ export default function GuiateGamePage() {
 			initializeGame();
 		}
 	}, [user, userLoading]);
+
+	// Cargar ranking
+	useEffect(() => {
+		const loadRanking = async () => {
+			try {
+				setRankingLoading(true);
+				const data = await getRanking(10); // Top 10
+				setRanking(data);
+			} catch (error) {
+				console.error("Error loading ranking:", error);
+			} finally {
+				setRankingLoading(false);
+			}
+		};
+
+		loadRanking();
+	}, []);
 
 	const loadUserProgress = async (
 		user: User,
@@ -557,26 +576,65 @@ export default function GuiateGamePage() {
 							<h1 className="text-xl font-bold text-white font-mono tracking-wider">
 								🌍 GUIATE
 							</h1>
-							{user && (
-								<span className="text-cyan-300 font-mono text-sm">
-									| {user.username}
-								</span>
-							)}
 						</div>
 
 						<div className="flex items-center space-x-2">
-							<button
-								onClick={() => setShowRanking(true)}
-								className="px-3 py-2 bg-cyan-600/80 backdrop-blur-sm text-white font-mono hover:bg-lime-500/80 transition-colors font-medium text-sm border border-cyan-400/50 hover:border-lime-400"
-							>
-								🏆
-							</button>
+							{user && (
+								<div className="px-3 py-2 bg-cyan-600/80 backdrop-blur-sm text-white font-mono text-sm border border-cyan-400/50">
+									👤 {user.username}
+								</div>
+							)}
 						</div>
 					</div>
 				</div>
 			</div>
 
 			<div className="container mx-auto px-4 py-4 space-y-4">
+				{/* Instrucciones - Estilo terminal */}
+				<details className="bg-gray-900/80 backdrop-blur-sm border-2 border-lime-400/50 shadow-xl relative overflow-hidden">
+					<summary className="p-4 cursor-pointer font-bold text-lime-400 text-center font-mono tracking-wider hover:text-cyan-400 transition-colors">
+						📖 &gt; Cómo jugar [expandir]
+					</summary>
+					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-lime-400/5 to-transparent opacity-50 pointer-events-none"></div>
+					<div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-cyan-300 relative z-10">
+						<div className="bg-black/30 p-3 border border-cyan-400/30">
+							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
+								🎯 OBJETIVO
+							</h4>
+							<p className="font-mono text-xs">
+								&gt; Adivina el país secreto en la menor cantidad de
+								intentos posible.
+							</p>
+						</div>
+						<div className="bg-black/30 p-3 border border-cyan-400/30">
+							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
+								🎨 COLORES
+							</h4>
+							<p className="font-mono text-xs">
+								&gt; Los países aparecen en el mapa con colores según su
+								distancia.
+							</p>
+						</div>
+						<div className="bg-black/30 p-3 border border-cyan-400/30">
+							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
+								📏 DISTANCIA
+							</h4>
+							<p className="font-mono text-xs">
+								&gt; La lista muestra todos tus intentos ordenados de
+								más cerca a más lejos.
+							</p>
+						</div>
+						<div className="bg-black/30 p-3 border border-cyan-400/30">
+							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
+								⌨️ CONTROLES
+							</h4>
+							<p className="font-mono text-xs">
+								&gt; Escribe el nombre del país y usa las flechas para
+								navegar.
+							</p>
+						</div>
+					</div>
+				</details>
 				{/* Input para adivinar - Estilo gamer */}
 				<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-cyan-400/50 shadow-xl relative overflow-hidden p-4">
 					{/* Efectos de scanline sutiles */}
@@ -654,7 +712,7 @@ export default function GuiateGamePage() {
 								</div>
 								<div className="flex items-center space-x-1">
 									<div className="w-3 h-3 bg-yellow-300"></div>
-									<span className="text-cyan-300">Muy lejos</span>
+									<span className="text-cyan-300">MUY LEJOS</span>
 								</div>
 							</div>
 						</div>
@@ -758,58 +816,147 @@ export default function GuiateGamePage() {
 					</div>
 				</div>
 
-				{/* Instrucciones - Estilo terminal */}
-				<details className="bg-gray-900/80 backdrop-blur-sm border-2 border-lime-400/50 shadow-xl relative overflow-hidden">
-					<summary className="p-4 cursor-pointer font-bold text-lime-400 text-center font-mono tracking-wider hover:text-cyan-400 transition-colors">
-						📖 &gt; Cómo jugar [expandir]
-					</summary>
-					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-lime-400/5 to-transparent opacity-50 pointer-events-none"></div>
-					<div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-cyan-300 relative z-10">
-						<div className="bg-black/30 p-3 border border-cyan-400/30">
-							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
-								🎯 OBJETIVO
-							</h4>
-							<p className="font-mono text-xs">
-								&gt; Adivina el país secreto en la menor cantidad de
-								intentos posible.
-							</p>
-						</div>
-						<div className="bg-black/30 p-3 border border-cyan-400/30">
-							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
-								🎨 COLORES
-							</h4>
-							<p className="font-mono text-xs">
-								&gt; Los países aparecen en el mapa con colores según su
-								distancia.
-							</p>
-						</div>
-						<div className="bg-black/30 p-3 border border-cyan-400/30">
-							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
-								📏 DISTANCIA
-							</h4>
-							<p className="font-mono text-xs">
-								&gt; La lista muestra todos tus intentos ordenados de
-								más cerca a más lejos.
-							</p>
-						</div>
-						<div className="bg-black/30 p-3 border border-cyan-400/30">
-							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
-								⌨️ CONTROLES
-							</h4>
-							<p className="font-mono text-xs">
-								&gt; Escribe el nombre del país y usa las flechas para
-								navegar.
-							</p>
+				{/* Ranking - Sección al pie de la página */}
+				<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-yellow-400/50 shadow-xl relative overflow-hidden p-4 mt-6">
+					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-yellow-400/5 to-transparent opacity-50 pointer-events-none"></div>
+
+					{/* Partículas decorativas */}
+					<div className="absolute top-2 left-2 w-2 h-2 bg-yellow-400 animate-pulse"></div>
+					<div className="absolute top-2 right-2 w-2 h-2 bg-orange-400 animate-pulse delay-500"></div>
+					<div className="absolute bottom-2 left-2 w-2 h-2 bg-red-400 animate-pulse delay-1000"></div>
+					<div className="absolute bottom-2 right-2 w-2 h-2 bg-pink-400 animate-pulse delay-300"></div>
+
+					<div className="relative z-10">
+						<h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 text-center font-mono tracking-wider">
+							🏆 RANKING DIARIO
+						</h2>
+
+						{/* Ranking simplificado para la página */}
+						<div className="max-w-4xl mx-auto">
+							{/* Top 3 destacado */}
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+								{[0, 1, 2].map((index) => {
+									const entry = ranking[index];
+									return (
+										<div
+											key={index}
+											className={`p-4 rounded-lg border-2 text-center ${
+												index === 0
+													? "border-yellow-400/50 bg-yellow-400/10"
+													: index === 1
+													? "border-gray-300/50 bg-gray-300/10"
+													: "border-orange-400/50 bg-orange-400/10"
+											}`}
+										>
+											<div className="text-3xl mb-2">
+												{index === 0
+													? "🥇"
+													: index === 1
+													? "🥈"
+													: "🥉"}
+											</div>
+											{entry ? (
+												<>
+													<div className="text-white font-mono font-bold text-lg mb-1">
+														{entry.username}
+													</div>
+													<div className="text-cyan-300 font-mono text-sm">
+														{entry.total_wins} victorias
+													</div>
+													<div className="text-lime-400 font-mono text-xs">
+														{entry.average_attempts.toFixed(1)}{" "}
+														prom.
+													</div>
+												</>
+											) : (
+												<>
+													<div className="text-white font-mono font-bold text-lg mb-1">
+														TOP {index + 1}
+													</div>
+													<div className="text-cyan-300 font-mono text-sm">
+														{rankingLoading
+															? "Cargando..."
+															: "Sin datos"}
+													</div>
+												</>
+											)}
+										</div>
+									);
+								})}
+							</div>
+
+							{/* Tabla de ranking */}
+							<div className="bg-black/30 rounded-lg border border-cyan-400/30 overflow-hidden">
+								<div className="grid grid-cols-5 gap-2 px-4 py-3 bg-black/50 border-b border-cyan-400/30 font-mono text-sm text-cyan-300">
+									<div className="text-center">#</div>
+									<div>JUGADOR</div>
+									<div className="text-center">VICTORIAS</div>
+									<div className="text-center">PROMEDIO</div>
+									<div className="text-center">RACHA</div>
+								</div>
+
+								{rankingLoading ? (
+									<div className="px-4 py-8 text-center">
+										<div className="text-cyan-400 font-mono mb-2">
+											&gt; Cargando ranking...
+										</div>
+										<div className="flex justify-center">
+											<div className="w-2 h-2 bg-cyan-400 animate-bounce mr-1"></div>
+											<div className="w-2 h-2 bg-cyan-400 animate-bounce delay-100 mr-1"></div>
+											<div className="w-2 h-2 bg-cyan-400 animate-bounce delay-200"></div>
+										</div>
+									</div>
+								) : ranking.length === 0 ? (
+									<div className="px-4 py-6 text-center">
+										<div className="text-cyan-400 font-mono">
+											&gt; No hay datos de ranking disponibles
+										</div>
+									</div>
+								) : (
+									<div className="divide-y divide-cyan-400/20">
+										{ranking.slice(0, 10).map((entry, index) => (
+											<div
+												key={entry.user_id}
+												className={`grid grid-cols-5 gap-2 px-4 py-3 font-mono text-sm transition-colors hover:bg-cyan-400/5 ${
+													entry.username === user?.username
+														? "bg-purple-400/10 border-l-4 border-purple-400"
+														: ""
+												}`}
+											>
+												<div className="text-center text-cyan-400 font-bold">
+													{index + 1}
+												</div>
+												<div className="text-white truncate">
+													{entry.username}
+													{entry.username === user?.username && (
+														<span className="text-purple-400 ml-1">
+															(Tú)
+														</span>
+													)}
+												</div>
+												<div className="text-center text-lime-400 font-bold">
+													{entry.total_wins}
+												</div>
+												<div className="text-center text-cyan-300">
+													{entry.average_attempts.toFixed(1)}
+												</div>
+												<div className="text-center text-purple-400">
+													{entry.best_streak}
+													{entry.current_streak > 0 && (
+														<span className="text-xs text-cyan-300 ml-1">
+															({entry.current_streak})
+														</span>
+													)}
+												</div>
+											</div>
+										))}
+									</div>
+								)}
+							</div>
 						</div>
 					</div>
-				</details>
+				</div>
 			</div>
-
-			{/* Modales */}
-			<RankingModal
-				isOpen={showRanking}
-				onClose={() => setShowRanking(false)}
-			/>
 		</div>
 	);
 }

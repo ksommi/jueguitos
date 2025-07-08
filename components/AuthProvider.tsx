@@ -198,121 +198,152 @@ export function AuthModal({
 	if (!isOpen) return null;
 
 	return (
-		<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-			<div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-				<h2 className="text-xl font-bold mb-4">Autenticación</h2>
+		<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+			{/* Modal con estética gamer */}
+			<div className="relative w-full max-w-md mx-4">
+				{/* Fondo del modal con gradiente gamer */}
+				<div className="relative bg-gradient-to-br from-purple-900/95 via-blue-900/95 to-indigo-900/95 rounded-xl p-6 border border-purple-500/30 shadow-2xl backdrop-blur-md">
+					{/* Efectos de luz en las esquinas */}
+					<div className="absolute top-0 left-0 w-full h-full rounded-xl bg-gradient-to-br from-cyan-400/10 via-purple-400/5 to-blue-400/10 pointer-events-none"></div>
 
-				<div className="flex gap-2 mb-4">
-					<button
-						onClick={() => setMode("anonymous")}
-						className={`px-3 py-1 rounded text-sm ${
-							mode === "anonymous"
-								? "bg-blue-600 text-white"
-								: "bg-gray-200 text-gray-700"
-						}`}
-					>
-						Anónimo
-					</button>
-					<button
-						onClick={() => setMode("login")}
-						className={`px-3 py-1 rounded text-sm ${
-							mode === "login"
-								? "bg-blue-600 text-white"
-								: "bg-gray-200 text-gray-700"
-						}`}
-					>
-						Iniciar Sesión
-					</button>
-					<button
-						onClick={() => setMode("signup")}
-						className={`px-3 py-1 rounded text-sm ${
-							mode === "signup"
-								? "bg-blue-600 text-white"
-								: "bg-gray-200 text-gray-700"
-						}`}
-					>
-						Registrarse
-					</button>
-				</div>
+					{/* Patrón de cuadrícula sutil */}
+					<div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] rounded-xl pointer-events-none"></div>
 
-				<form onSubmit={handleSubmit} className="space-y-4">
-					{mode === "anonymous" ? (
-						<p className="text-gray-600 text-sm">
-							Continúa como usuario anónimo. Podrás jugar pero no se
-							guardarán tus estadísticas permanentemente.
-						</p>
-					) : (
-						<>
-							{mode === "signup" && (
-								<div>
-									<label className="block text-sm font-medium text-gray-700 mb-1">
-										Nombre de usuario
-									</label>
-									<input
-										type="text"
-										value={username}
-										onChange={(e) => setUsername(e.target.value)}
-										className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-										placeholder="Elige un nombre de usuario"
-										required
-									/>
+					{/* Partículas decorativas */}
+					<div className="absolute top-4 right-4 w-1 h-1 bg-cyan-400 rounded-full animate-pulse"></div>
+					<div className="absolute top-8 left-6 w-0.5 h-0.5 bg-purple-400 rounded-full animate-ping delay-500"></div>
+					<div className="absolute bottom-6 right-8 w-0.5 h-0.5 bg-blue-400 rounded-full animate-pulse delay-1000"></div>
+
+					{/* Contenido del modal */}
+					<div className="relative z-10">
+						<h2 className="text-xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-blue-400 text-center">
+							🎮 AUTENTICACIÓN
+						</h2>
+
+						<div className="flex gap-2 mb-6">
+							<button
+								onClick={() => setMode("anonymous")}
+								className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+									mode === "anonymous"
+										? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/25 border border-cyan-400/50"
+										: "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-600/30 hover:border-purple-500/50"
+								}`}
+							>
+								👤 Anónimo
+							</button>
+							<button
+								onClick={() => setMode("login")}
+								className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+									mode === "login"
+										? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/25 border border-purple-400/50"
+										: "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-600/30 hover:border-purple-500/50"
+								}`}
+							>
+								🔑 Iniciar Sesión
+							</button>
+							<button
+								onClick={() => setMode("signup")}
+								className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+									mode === "signup"
+										? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg shadow-pink-500/25 border border-pink-400/50"
+										: "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-600/30 hover:border-purple-500/50"
+								}`}
+							>
+								✨ Registrarse
+							</button>
+						</div>
+
+						<form onSubmit={handleSubmit} className="space-y-4">
+							{mode === "anonymous" ? (
+								<div className="bg-gray-800/30 border border-gray-600/30 rounded-lg p-4 backdrop-blur-sm">
+									<p className="text-gray-300 text-sm text-center">
+										🎭 Continúa como usuario anónimo. Podrás jugar
+										pero no se guardarán tus estadísticas
+										permanentemente.
+									</p>
+								</div>
+							) : (
+								<>
+									{mode === "signup" && (
+										<div>
+											<label className="block text-sm font-medium text-gray-300 mb-2">
+												👤 Nombre de usuario
+											</label>
+											<input
+												type="text"
+												value={username}
+												onChange={(e) =>
+													setUsername(e.target.value)
+												}
+												className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white placeholder-gray-400 transition-all duration-200 backdrop-blur-sm"
+												placeholder="Elige un nombre de usuario"
+												required
+											/>
+										</div>
+									)}
+									<div>
+										<label className="block text-sm font-medium text-gray-300 mb-2">
+											📧 Email
+										</label>
+										<input
+											type="email"
+											value={email}
+											onChange={(e) => setEmail(e.target.value)}
+											className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white placeholder-gray-400 transition-all duration-200 backdrop-blur-sm"
+											placeholder="tu@email.com"
+											required
+										/>
+									</div>
+									<div>
+										<label className="block text-sm font-medium text-gray-300 mb-2">
+											🔒 Contraseña
+										</label>
+										<input
+											type="password"
+											value={password}
+											onChange={(e) => setPassword(e.target.value)}
+											className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white placeholder-gray-400 transition-all duration-200 backdrop-blur-sm"
+											placeholder="••••••••"
+											required
+											minLength={6}
+										/>
+									</div>
+								</>
+							)}
+
+							{error && (
+								<div className="bg-red-900/30 border border-red-500/50 rounded-lg p-3 backdrop-blur-sm">
+									<p className="text-red-300 text-sm text-center">
+										⚠️ {error}
+									</p>
 								</div>
 							)}
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-1">
-									Email
-								</label>
-								<input
-									type="email"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-									placeholder="tu@email.com"
-									required
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-1">
-									Contraseña
-								</label>
-								<input
-									type="password"
-									value={password}
-									onChange={(e) => setPassword(e.target.value)}
-									className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-									placeholder="••••••••"
-									required
-									minLength={6}
-								/>
-							</div>
-						</>
-					)}
 
-					{error && <p className="text-red-600 text-sm">{error}</p>}
-
-					<div className="flex gap-3">
-						<button
-							type="button"
-							onClick={onClose}
-							className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-						>
-							Cancelar
-						</button>
-						<button
-							type="submit"
-							disabled={loading}
-							className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-						>
-							{loading
-								? "Cargando..."
-								: mode === "anonymous"
-								? "Continuar"
-								: mode === "signup"
-								? "Registrarse"
-								: "Iniciar Sesión"}
-						</button>
+							<div className="flex gap-3 pt-4">
+								<button
+									type="button"
+									onClick={onClose}
+									className="flex-1 px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg text-gray-300 hover:bg-gray-700/50 hover:border-gray-500/50 transition-all duration-200 font-medium backdrop-blur-sm"
+								>
+									❌ Cancelar
+								</button>
+								<button
+									type="submit"
+									disabled={loading}
+									className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg shadow-purple-500/25 border border-purple-400/50"
+								>
+									{loading
+										? "⏳ Cargando..."
+										: mode === "anonymous"
+										? "🚀 Continuar"
+										: mode === "signup"
+										? "✨ Registrarse"
+										: "🔑 Iniciar Sesión"}
+								</button>
+							</div>
+						</form>
 					</div>
-				</form>
+				</div>
 			</div>
 		</div>
 	);

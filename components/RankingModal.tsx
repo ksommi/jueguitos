@@ -6,18 +6,20 @@ import { getRanking, RankingEntry } from "@/lib/supabase";
 export default function RankingModal({
 	isOpen,
 	onClose,
+	embedded = false,
 }: {
 	isOpen: boolean;
 	onClose: () => void;
+	embedded?: boolean;
 }) {
 	const [ranking, setRanking] = useState<RankingEntry[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		if (isOpen) {
+		if (isOpen || embedded) {
 			loadRanking();
 		}
-	}, [isOpen]);
+	}, [isOpen, embedded]);
 
 	const loadRanking = async () => {
 		setLoading(true);
