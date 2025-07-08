@@ -353,45 +353,95 @@ export function getTodayDateString(): string {
 }
 
 export function getDailyGameState(): DailyGameState {
-	const todayString = getTodayDateString();
-	const stored = localStorage.getItem("dailyGameState");
-
-	if (stored) {
-		const state = JSON.parse(stored);
-		// Si es del mismo día, devolver el estado guardado
-		if (state.date === todayString) {
-			// Migrar datos antiguos si es necesario
-			if (
-				state.guesses &&
-				state.guesses.length > 0 &&
-				typeof state.guesses[0] === "string"
-			) {
-				// Formato antiguo: array de strings
-				// Convertir a nuevo formato pero perdemos las distancias (se recalcularán)
-				state.guesses = state.guesses.map((countryName: string) => ({
-					countryName,
-					distance: 0, // Se recalculará en el componente
-				}));
-			}
-			return state;
-		}
+	// Verificar si estamos en el navegador
+	if (typeof window === "undefined") {
+		return {
+			date: getTodayDateString(),
+			completed: false,
+			attempts: 0,
+			won: false,
+			guesses: [],
+		};
 	}
 
-	// Si no hay estado o es de otro día, crear nuevo estado
-	const newState: DailyGameState = {
-		date: todayString,
-		completed: false,
-		attempts: 0,
-		won: false,
-		guesses: [],
-	};
+	const todayString = getTodayDateString();
 
-	localStorage.setItem("dailyGameState", JSON.stringify(newState));
-	return newState;
+	try {
+		const stored = localStorage.getItem("dailyGameState");
+
+		if (stored) {
+			const state = JSON.parse(stored);
+			// Si es del mismo día, devolver el estado guardado
+			if (state.date === todayString) {
+				// Migrar datos antiguos si es necesario
+				if (
+					state.guesses &&
+					state.guesses.length > 0 &&
+					typeof state.guesses[0] === "string"
+				) {
+					// Formato antiguo: array de strings
+					// Convertir a nuevo formato pero perdemos las distancias (se recalcularán)
+					state.guesses = state.guesses.map((countryName: string) => ({
+						countryName,
+						distance: 0, // Se recalculará en el componente
+					}));
+				}
+				return state;
+			}
+		}
+
+		// Si no hay estado o es de otro día, crear nuevo estado
+		const newState: DailyGameState = {
+			date: todayString,
+			completed: false,
+			attempts: 0,
+			won: false,
+			guesses: [],
+		};
+
+		localStorage.setItem("dailyGameState", JSON.stringify(newState));
+		return newState;
+	} catch (error) {
+		console.error("Error al acceder al localStorage:", error);
+		// Devolver estado por defecto si hay error
+		return {
+			date: todayString,
+			completed: false,
+			attempts: 0,
+			won: false,
+			guesses: [],
+		};
+	}
 }
 
 export function saveDailyGameState(state: DailyGameState): void {
-	localStorage.setItem("dailyGameState", JSON.stringify(state));
+	// Verificar si estamos en el navegador
+	if (typeof window === "undefined") {
+		console.warn(
+			"Intentando guardar estado del juego en servidor, ignorando."
+		);
+		return;
+	}
+
+	try {
+		const stateToSave = {
+			...state,
+			date: getTodayDateString(), // Asegurar que siempre tenga la fecha correcta
+		};
+
+		localStorage.setItem("dailyGameState", JSON.stringify(stateToSave));
+	} catch (error) {
+		console.error("Error al guardar estado del juego:", error);
+		// Intentar limpiar localStorage si está lleno
+		if (error instanceof Error && error.name === "QuotaExceededError") {
+			try {
+				localStorage.removeItem("dailyGameState");
+				localStorage.setItem("dailyGameState", JSON.stringify(state));
+			} catch (secondError) {
+				console.error("Error crítico al guardar estado:", secondError);
+			}
+		}
+	}
 }
 
 export function hasPlayedToday(): boolean {
@@ -420,10 +470,6 @@ export function debugDailyCountry(): {
 	let seed = daysSinceEpoch;
 	seed = ((seed * 1103515245 + 12345) & 0x7fffffff) % 2147483647;
 
-	console.log(
-		`🌍 País del día para ${dateString}: ${country.name} (índice: ${index}, día: ${daysSinceEpoch}, semilla: ${seed})`
-	);
-
 	return {
 		country,
 		date: dateString,
@@ -431,6 +477,44 @@ export function debugDailyCountry(): {
 		daysSinceEpoch,
 		seed,
 	};
+}
+
+// Función de debug para verificar el estado del localStorage
+export function debugLocalStorage(): void {
+	if (typeof window === "undefined") {
+		return;
+	}
+
+	try {
+		const dailyState = localStorage.getItem("dailyGameState");
+
+		if (dailyState) {
+			JSON.parse(dailyState);
+		}
+
+		const gameStats = localStorage.getItem("gameStats");
+
+		if (gameStats) {
+			JSON.parse(gameStats);
+		}
+	} catch (error) {
+		console.error("Error en debug de localStorage:", error);
+	}
+}
+
+// Función para limpiar localStorage en caso de corrupción
+export function clearGameData(): void {
+	if (typeof window === "undefined") {
+		console.warn("Intentando limpiar datos en servidor, ignorando.");
+		return;
+	}
+
+	try {
+		localStorage.removeItem("dailyGameState");
+		localStorage.removeItem("gameStats");
+	} catch (error) {
+		console.error("Error al limpiar datos del juego:", error);
+	}
 }
 
 // Función para normalizar texto removiendo tildes y caracteres especiales
@@ -479,48 +563,85 @@ export function getGameStats(): GameStats {
 		};
 	}
 
-	const stored = localStorage.getItem("gameStats");
-	if (stored) {
-		return JSON.parse(stored);
+	try {
+		const stored = localStorage.getItem("gameStats");
+		if (stored) {
+			const stats = JSON.parse(stored);
+			// Validar que el objeto tiene todas las propiedades necesarias
+			return {
+				gamesPlayed: stats.gamesPlayed || 0,
+				gamesWon: stats.gamesWon || 0,
+				currentStreak: stats.currentStreak || 0,
+				maxStreak: stats.maxStreak || 0,
+				winPercentage: stats.winPercentage || 0,
+				averageGuesses: stats.averageGuesses || 0,
+				lastPlayDate: stats.lastPlayDate || "",
+			};
+		}
+
+		const defaultStats: GameStats = {
+			gamesPlayed: 0,
+			gamesWon: 0,
+			currentStreak: 0,
+			maxStreak: 0,
+			winPercentage: 0,
+			averageGuesses: 0,
+			lastPlayDate: "",
+		};
+
+		localStorage.setItem("gameStats", JSON.stringify(defaultStats));
+		return defaultStats;
+	} catch (error) {
+		console.error("Error al obtener estadísticas:", error);
+		return {
+			gamesPlayed: 0,
+			gamesWon: 0,
+			currentStreak: 0,
+			maxStreak: 0,
+			winPercentage: 0,
+			averageGuesses: 0,
+			lastPlayDate: "",
+		};
 	}
-
-	const defaultStats: GameStats = {
-		gamesPlayed: 0,
-		gamesWon: 0,
-		currentStreak: 0,
-		maxStreak: 0,
-		winPercentage: 0,
-		averageGuesses: 0,
-		lastPlayDate: "",
-	};
-
-	localStorage.setItem("gameStats", JSON.stringify(defaultStats));
-	return defaultStats;
 }
 
 export function updateGameStats(won: boolean, attempts: number): GameStats {
-	const stats = getGameStats();
-	const today = getTodayDateString();
-
-	stats.gamesPlayed++;
-	stats.lastPlayDate = today;
-
-	if (won) {
-		stats.gamesWon++;
-		stats.currentStreak++;
-		stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
-	} else {
-		stats.currentStreak = 0;
+	if (typeof window === "undefined") {
+		console.warn(
+			"Intentando actualizar estadísticas en servidor, ignorando."
+		);
+		return getGameStats();
 	}
 
-	stats.winPercentage = Math.round((stats.gamesWon / stats.gamesPlayed) * 100);
-	stats.averageGuesses = Math.round(
-		(stats.averageGuesses * (stats.gamesPlayed - 1) + attempts) /
-			stats.gamesPlayed
-	);
+	try {
+		const stats = getGameStats();
+		const today = getTodayDateString();
 
-	localStorage.setItem("gameStats", JSON.stringify(stats));
-	return stats;
+		stats.gamesPlayed++;
+		stats.lastPlayDate = today;
+
+		if (won) {
+			stats.gamesWon++;
+			stats.currentStreak++;
+			stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
+		} else {
+			stats.currentStreak = 0;
+		}
+
+		stats.winPercentage = Math.round(
+			(stats.gamesWon / stats.gamesPlayed) * 100
+		);
+		stats.averageGuesses = Math.round(
+			(stats.averageGuesses * (stats.gamesPlayed - 1) + attempts) /
+				stats.gamesPlayed
+		);
+
+		localStorage.setItem("gameStats", JSON.stringify(stats));
+		return stats;
+	} catch (error) {
+		console.error("Error al actualizar estadísticas:", error);
+		return getGameStats();
+	}
 }
 
 // Función para generar el resultado en emojis para compartir

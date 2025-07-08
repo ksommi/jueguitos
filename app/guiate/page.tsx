@@ -4,18 +4,18 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
-	Country,
-	getDailyCountry,
-	getDailyGameState,
-	saveDailyGameState,
-	DailyGameState,
-	COUNTRIES,
-	getGameStats,
-	updateGameStats,
-	generateShareText,
-	GameStats,
-} from "@/lib/countries";
+	getTodayCountry,
+	saveGameResult,
+	getUserGameResult,
+	testSupabaseConnection,
+	DailyCountry,
+	User,
+} from "@/lib/supabase";
+import { Country, COUNTRIES, generateShareText } from "@/lib/countries";
 import { calculateDistanceCountries } from "@/lib/geoData";
+import { useAuth } from "@/components/AuthProvider";
+import { AuthModal } from "@/components/AuthProvider";
+import RankingModal from "@/components/RankingModal";
 
 import CountryInput from "@/components/CountryInput";
 import GuessList from "@/components/GuessList";
@@ -38,7 +38,9 @@ interface Guess {
 	distance: number;
 }
 
-export default function AdivinarPaisPage() {
+export default function GuiateGamePage() {
+	const { user, loading: userLoading } = useAuth();
+	const [dailyCountry, setDailyCountry] = useState<DailyCountry | null>(null);
 	const [targetCountry, setTargetCountry] = useState<Country | null>(null);
 	const [guesses, setGuesses] = useState<Guess[]>([]);
 	const [gameWon, setGameWon] = useState(false);
@@ -48,144 +50,346 @@ export default function AdivinarPaisPage() {
 		null
 	);
 	const [zoomToCountry, setZoomToCountry] = useState<Country | null>(null);
-	const [gameStats, setGameStats] = useState<GameStats | null>(null);
-	const [showStats, setShowStats] = useState(false);
 	const [gameCompleted, setGameCompleted] = useState(false);
-
-	// Funciones auxiliares
-	const getCurrentDateString = (): string => {
-		const now = new Date();
-		const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
-		const utcDate = new Date(utcTime);
-		return (
-			utcDate.getFullYear() +
-			"-" +
-			String(utcDate.getMonth() + 1).padStart(2, "0") +
-			"-" +
-			String(utcDate.getDate()).padStart(2, "0")
-		);
-	};
-
-	const saveGameProgress = (
-		newGuesses: Guess[],
-		newAttempts: number,
-		isWon: boolean
-	) => {
-		if (typeof window !== "undefined") {
-			const gameState: DailyGameState = {
-				date: getCurrentDateString(),
-				completed: isWon,
-				attempts: newAttempts,
-				won: isWon,
-				guesses: newGuesses.map((g) => ({
-					countryName: g.country.name,
-					distance: g.distance,
-				})),
-			};
-			saveDailyGameState(gameState);
-		}
-	};
-
-	const resetGameState = () => {
-		setGuesses([]);
-		setGameWon(false);
-		setAttempts(0);
-
-		if (typeof window !== "undefined") {
-			const newState: DailyGameState = {
-				date: getCurrentDateString(),
-				completed: false,
-				attempts: 0,
-				won: false,
-				guesses: [],
-			};
-			saveDailyGameState(newState);
-		}
-	};
+	const [loading, setLoading] = useState(true);
+	const [showAuthModal, setShowAuthModal] = useState(false);
+	const [showRanking, setShowRanking] = useState(false);
 
 	// Inicializar el juego
 	useEffect(() => {
-		const initializeGame = () => {
-			const dailyCountry = getDailyCountry();
-			setTargetCountry(dailyCountry);
+		const initializeGame = async () => {
+			try {
+				setLoading(true);
 
-			// Cargar el estado del juego desde localStorage
-			if (typeof window !== "undefined") {
-				const gameState = getDailyGameState();
-
-				if (gameState.date === getCurrentDateString()) {
-					// Si ya hay un juego del día actual, cargar el progreso
-					const loadedGuesses = gameState.guesses
-						.map((guessData) => {
-							const country = COUNTRIES.find(
-								(c) => c.name === guessData.countryName
-							);
-							if (country) {
-								// Si la distancia es 0, recalcular (migración de datos antiguos)
-								const distance =
-									guessData.distance === 0
-										? calculateDistanceCountries(
-												country.name,
-												dailyCountry.name
-										  )
-										: guessData.distance;
-
-								return {
-									country,
-									distance,
-								};
-							}
-							return null;
-						})
-						.filter(Boolean) as Guess[];
-
-					setGuesses(loadedGuesses);
-					setAttempts(gameState.attempts);
-					setGameWon(gameState.won);
-					setGameCompleted(gameState.completed);
-				} else {
-					// Nuevo día, reiniciar el juego
-					setGuesses([]);
-					setGameWon(false);
-					setAttempts(0);
-
-					if (typeof window !== "undefined") {
-						const newState: DailyGameState = {
-							date: getCurrentDateString(),
-							completed: false,
-							attempts: 0,
-							won: false,
-							guesses: [],
-						};
-						saveDailyGameState(newState);
-					}
+				// Probar conexión primero
+				const connectionOk = await testSupabaseConnection();
+				if (!connectionOk) {
+					console.error("Failed to connect to Supabase");
+					return;
 				}
+
+				// Obtener país del día desde la base de datos
+				const todayCountryData = await getTodayCountry();
+				if (!todayCountryData) {
+					console.error("No se pudo obtener el país del día");
+					return;
+				}
+
+				setDailyCountry(todayCountryData);
+
+				// Encontrar el país en la lista local
+				const country = COUNTRIES.find(
+					(c) =>
+						c.name === todayCountryData.country_name ||
+						c.code === todayCountryData.country_code
+				);
+
+				if (!country) {
+					console.error(
+						"País no encontrado en la lista local:",
+						todayCountryData
+					);
+					return;
+				}
+
+				setTargetCountry(country);
+
+				// Si hay usuario, cargar progreso
+				if (user && !userLoading) {
+					await loadUserProgress(user, todayCountryData.id, country);
+				}
+			} catch (error) {
+				console.error("Error inicializando el juego:", error);
+			} finally {
+				setLoading(false);
 			}
 		};
 
-		initializeGame();
-
-		// Cargar estadísticas
-		if (typeof window !== "undefined") {
-			const stats = getGameStats();
-			setGameStats(stats);
+		if (!userLoading) {
+			initializeGame();
 		}
-	}, []);
+	}, [user, userLoading]);
 
-	const startNewGame = () => {
-		resetGameState();
-		const dailyCountry = getDailyCountry();
-		setTargetCountry(dailyCountry);
-		console.log("País del día:", dailyCountry.name); // Para debugging - remover en producción
+	const loadUserProgress = async (
+		user: User,
+		dailyCountryId: number,
+		country: Country
+	) => {
+		try {
+			const existingResult = await getUserGameResult(dailyCountryId);
+
+			if (existingResult) {
+				// El usuario ya jugó hoy, cargar progreso
+				const savedGuesses =
+					typeof existingResult.guesses === "string"
+						? JSON.parse(existingResult.guesses)
+						: existingResult.guesses || [];
+				const loadedGuesses: Guess[] = savedGuesses
+					.map((g: { country: string; distance: number }) => {
+						const guessCountry = COUNTRIES.find(
+							(c) => c.name === g.country
+						);
+						return guessCountry
+							? {
+									country: guessCountry,
+									distance:
+										g.distance ||
+										calculateDistanceCountries(
+											guessCountry.name,
+											country.name
+										),
+							  }
+							: null;
+					})
+					.filter(Boolean);
+
+				setGuesses(loadedGuesses);
+				setAttempts(existingResult.attempts);
+				setGameWon(existingResult.won);
+				// Solo marcar como completado si realmente ganó
+				setGameCompleted(existingResult.won);
+			}
+		} catch (error) {
+			console.error("Error cargando progreso del usuario:", error);
+		}
 	};
 
-	const handleGuess = (country: Country) => {
-		if (!targetCountry || gameWon || gameCompleted) return;
+	const handleGuess = async (country: Country) => {
+		if (!targetCountry || !dailyCountry || gameWon || gameCompleted || !user)
+			return;
 
-		const distance =
-			country.code === targetCountry.code
-				? 0
-				: calculateDistanceCountries(country.name, targetCountry.name);
+		// Función para verificar si dos países comparten frontera
+		const areCountriesBordering = (
+			country1: string,
+			country2: string
+		): boolean => {
+			// Casos específicos conocidos de fronteras (verificación directa)
+			const specificBorders = [
+				["Estados Unidos", "México"],
+				["Estados Unidos", "Canadá"],
+				["México", "Guatemala"],
+				["México", "Belice"],
+			];
+
+			for (const [c1, c2] of specificBorders) {
+				if (
+					(country1 === c1 && country2 === c2) ||
+					(country1 === c2 && country2 === c1)
+				) {
+					return true;
+				}
+			}
+
+			const borders: { [key: string]: string[] } = {
+				// América del Norte
+				"Estados Unidos": ["Canadá", "México"],
+				Canadá: ["Estados Unidos"],
+				México: ["Estados Unidos", "Guatemala", "Belice"],
+
+				// América Central
+				Guatemala: ["México", "Belice", "Honduras", "El Salvador"],
+				Belice: ["México", "Guatemala"],
+				Honduras: ["Guatemala", "El Salvador", "Nicaragua"],
+				"El Salvador": ["Guatemala", "Honduras"],
+				Nicaragua: ["Honduras", "Costa Rica"],
+				"Costa Rica": ["Nicaragua", "Panamá"],
+				Panamá: ["Costa Rica", "Colombia"],
+
+				// América del Sur
+				Colombia: ["Panamá", "Venezuela", "Brasil", "Perú", "Ecuador"],
+				Venezuela: ["Colombia", "Brasil", "Guyana"],
+				Guyana: ["Venezuela", "Brasil", "Surinam"],
+				Surinam: ["Guyana", "Brasil", "Guayana Francesa"],
+				"Guayana Francesa": ["Surinam", "Brasil"],
+				Brasil: [
+					"Colombia",
+					"Venezuela",
+					"Guyana",
+					"Surinam",
+					"Guayana Francesa",
+					"Uruguay",
+					"Argentina",
+					"Paraguay",
+					"Bolivia",
+					"Perú",
+				],
+				Ecuador: ["Colombia", "Perú"],
+				Perú: ["Ecuador", "Colombia", "Brasil", "Bolivia", "Chile"],
+				Bolivia: ["Perú", "Brasil", "Paraguay", "Argentina", "Chile"],
+				Chile: ["Perú", "Bolivia", "Argentina"],
+				Argentina: ["Chile", "Bolivia", "Paraguay", "Brasil", "Uruguay"],
+				Paraguay: ["Bolivia", "Brasil", "Argentina"],
+				Uruguay: ["Brasil", "Argentina"],
+
+				// Europa Occidental
+				España: ["Francia", "Andorra", "Portugal"],
+				Francia: [
+					"España",
+					"Andorra",
+					"Italia",
+					"Suiza",
+					"Alemania",
+					"Luxemburgo",
+					"Bélgica",
+				],
+				Portugal: ["España"],
+				Andorra: ["España", "Francia"],
+				Italia: [
+					"Francia",
+					"Suiza",
+					"Austria",
+					"Eslovenia",
+					"San Marino",
+					"Vaticano",
+				],
+				Suiza: [
+					"Francia",
+					"Italia",
+					"Austria",
+					"Alemania",
+					"Liechtenstein",
+				],
+				Austria: [
+					"Italia",
+					"Suiza",
+					"Alemania",
+					"República Checa",
+					"Eslovaquia",
+					"Hungría",
+					"Eslovenia",
+				],
+				Alemania: [
+					"Francia",
+					"Suiza",
+					"Austria",
+					"República Checa",
+					"Polonia",
+					"Holanda",
+					"Bélgica",
+					"Luxemburgo",
+					"Dinamarca",
+				],
+				Holanda: ["Alemania", "Bélgica"],
+				Bélgica: ["Francia", "Holanda", "Alemania", "Luxemburgo"],
+				Luxemburgo: ["Francia", "Alemania", "Bélgica"],
+
+				// Europa del Este
+				Polonia: [
+					"Alemania",
+					"República Checa",
+					"Eslovaquia",
+					"Ucrania",
+					"Bielorrusia",
+					"Lituania",
+					"Rusia",
+				],
+				"República Checa": ["Alemania", "Austria", "Eslovaquia", "Polonia"],
+				Eslovaquia: [
+					"República Checa",
+					"Austria",
+					"Hungría",
+					"Ucrania",
+					"Polonia",
+				],
+				Hungría: [
+					"Austria",
+					"Eslovaquia",
+					"Ucrania",
+					"Rumania",
+					"Serbia",
+					"Croacia",
+					"Eslovenia",
+				],
+				Eslovenia: ["Italia", "Austria", "Hungría", "Croacia"],
+
+				// África
+				Marruecos: ["Argelia", "España"], // España por Ceuta y Melilla
+				Argelia: [
+					"Marruecos",
+					"Túnez",
+					"Libia",
+					"Níger",
+					"Mali",
+					"Mauritania",
+				],
+				Túnez: ["Argelia", "Libia"],
+				Libia: ["Túnez", "Argelia", "Níger", "Chad", "Sudán", "Egipto"],
+				Egipto: ["Libia", "Sudán"],
+				Sudáfrica: [
+					"Namibia",
+					"Botsuana",
+					"Zimbabue",
+					"Mozambique",
+					"Esuatini",
+					"Lesoto",
+				],
+
+				// Asia
+				China: [
+					"Rusia",
+					"Mongolia",
+					"Kazajistán",
+					"Kirguistán",
+					"Tayikistán",
+					"Afganistán",
+					"Pakistán",
+					"India",
+					"Nepal",
+					"Bután",
+					"Myanmar",
+					"Laos",
+					"Vietnam",
+					"Corea del Norte",
+				],
+				India: [
+					"Pakistán",
+					"China",
+					"Nepal",
+					"Bután",
+					"Bangladesh",
+					"Myanmar",
+				],
+				Rusia: [
+					"Noruega",
+					"Finlandia",
+					"Estonia",
+					"Letonia",
+					"Lituania",
+					"Polonia",
+					"Bielorrusia",
+					"Ucrania",
+					"Georgia",
+					"Azerbaiyán",
+					"Kazajistán",
+					"China",
+					"Mongolia",
+					"Corea del Norte",
+				],
+			};
+
+			const country1Borders = borders[country1] || [];
+			const country2Borders = borders[country2] || [];
+			const result =
+				country1Borders.includes(country2) ||
+				country2Borders.includes(country1);
+			return result;
+		};
+
+		let distance: number;
+
+		if (country.code === targetCountry.code) {
+			// Mismo país
+			distance = 0;
+		} else if (areCountriesBordering(country.name, targetCountry.name)) {
+			// Países fronterizos
+			distance = 0;
+		} else {
+			// Calcular distancia real
+			distance = calculateDistanceCountries(
+				country.name,
+				targetCountry.name
+			);
+		}
 
 		const newGuess: Guess = { country, distance };
 		const newGuesses = [...guesses, newGuess];
@@ -203,18 +407,27 @@ export default function AdivinarPaisPage() {
 		if (isWon) {
 			setGameWon(true);
 			setGameCompleted(true);
-
-			// Actualizar estadísticas
-			const updatedStats = updateGameStats(true, newAttempts);
-			setGameStats(updatedStats);
 		}
 
-		// Guardar progreso en localStorage
-		saveGameProgress(newGuesses, newAttempts, isWon);
+		// Guardar resultado en la base de datos
+		try {
+			const guessesForDB = newGuesses.map((g) => ({
+				country: g.country.name,
+				distance: g.distance,
+			}));
+
+			await saveGameResult(
+				dailyCountry.id,
+				isWon,
+				newAttempts,
+				guessesForDB
+			);
+		} catch (error) {
+			console.error("Error guardando resultado:", error);
+		}
 	};
 
 	const handleCountryClick = (country: Country) => {
-		console.log("País clickeado:", country.name);
 		setHighlightedCountry(country);
 	};
 
@@ -269,12 +482,44 @@ export default function AdivinarPaisPage() {
 		}
 	};
 
-	if (!targetCountry) {
+	// Mostrar modal de username si no hay usuario
+	if (!userLoading && !user) {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<div className="text-center max-w-md mx-auto p-6">
+					<div className="mb-6">
+						<h1 className="text-4xl font-bold text-cyan-400 font-mono mb-4">
+							🌍 GUIATE
+						</h1>
+						<p className="text-cyan-300 font-mono">
+							Necesitas un nombre de usuario para guardar tu progreso
+						</p>
+					</div>
+
+					<button
+						onClick={() => setShowAuthModal(true)}
+						className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-lime-500 text-black font-mono font-bold tracking-wider transition-all duration-300 hover:scale-105"
+					>
+						&gt; CREAR JUGADOR
+					</button>
+				</div>
+
+				<AuthModal
+					isOpen={showAuthModal}
+					onClose={() => setShowAuthModal(false)}
+				/>
+			</div>
+		);
+	}
+
+	if (loading || userLoading || !targetCountry || !dailyCountry) {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-					<p className="text-xl text-gray-600">Preparando el juego...</p>
+					<div className="animate-spin rounded-full h-16 w-16 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+					<p className="text-xl text-cyan-400 font-mono">
+						Preparando el juego...
+					</p>
 				</div>
 			</div>
 		);
@@ -308,25 +553,24 @@ export default function AdivinarPaisPage() {
 							</span>
 						</Link>
 
-						<h1 className="text-lg md:text-2xl font-bold text-white font-mono tracking-wider pixel-title">
-							🌍 <span className="text-cyan-400">GUIATE</span>
-						</h1>
+						<div className="flex items-center space-x-2">
+							<h1 className="text-xl font-bold text-white font-mono tracking-wider">
+								🌍 GUIATE
+							</h1>
+							{user && (
+								<span className="text-cyan-300 font-mono text-sm">
+									| {user.username}
+								</span>
+							)}
+						</div>
 
-						<div className="flex space-x-2">
+						<div className="flex items-center space-x-2">
 							<button
-								onClick={() => setShowStats(!showStats)}
+								onClick={() => setShowRanking(true)}
 								className="px-3 py-2 bg-cyan-600/80 backdrop-blur-sm text-white font-mono hover:bg-lime-500/80 transition-colors font-medium text-sm border border-cyan-400/50 hover:border-lime-400"
 							>
-								📊
+								🏆
 							</button>
-							{process.env.NODE_ENV === "development" && (
-								<button
-									onClick={startNewGame}
-									className="px-3 py-2 bg-purple-600/80 backdrop-blur-sm text-white font-mono hover:bg-purple-500/80 transition-colors font-medium text-sm border border-purple-400/50"
-								>
-									🔄
-								</button>
-							)}
 						</div>
 					</div>
 				</div>
@@ -369,64 +613,20 @@ export default function AdivinarPaisPage() {
 								en {attempts} intentos!
 							</p>
 
-							{/* Estadísticas rápidas con estilo retro */}
-							{gameStats && (
-								<div className="bg-black/50 backdrop-blur-sm border border-cyan-400/30 p-3 mb-4">
-									<div className="grid grid-cols-3 gap-4 text-center">
-										<div>
-											<div className="text-lg font-bold text-lime-400 font-mono">
-												{gameStats.gamesPlayed}
-											</div>
-											<div className="text-xs text-cyan-300 font-mono">
-												JUGADOS
-											</div>
-										</div>
-										<div>
-											<div className="text-lg font-bold text-cyan-400 font-mono">
-												{gameStats.averageGuesses}
-											</div>
-											<div className="text-xs text-cyan-300 font-mono">
-												Promedio
-											</div>
-										</div>
-										<div>
-											<div className="text-lg font-bold text-purple-400 font-mono">
-												{gameStats.currentStreak}
-											</div>
-											<div className="text-xs text-cyan-300 font-mono">
-												RACHA
-											</div>
-										</div>
-									</div>
-								</div>
-							)}
-
-							{/* Botones de compartir con estilo arcade */}
-							<div className="grid grid-cols-2 gap-3 mb-3">
+							<div className="flex flex-wrap gap-2 justify-center">
 								<button
 									onClick={shareOnWhatsApp}
-									className="flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-lime-500 to-green-500 text-black font-mono font-bold transition-colors pixel-button"
+									className="px-4 py-2 bg-green-600 text-white font-mono hover:bg-green-500 transition-colors"
 								>
-									<span>📱</span>
-									<span>WHATSAPP</span>
+									📱 WhatsApp
 								</button>
 								<button
 									onClick={copyToClipboard}
-									className="flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black font-mono font-bold transition-colors pixel-button"
+									className="px-4 py-2 bg-blue-600 text-white font-mono hover:bg-blue-500 transition-colors"
 								>
-									<span>📋</span>
-									<span>COPIAR</span>
+									📋 Copiar
 								</button>
 							</div>
-
-							{process.env.NODE_ENV === "development" && (
-								<button
-									onClick={startNewGame}
-									className="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-black font-mono font-bold transition-colors pixel-button"
-								>
-									🔄 REINICIAR
-								</button>
-							)}
 						</div>
 
 						{/* Píxeles de celebración */}
@@ -505,6 +705,7 @@ export default function AdivinarPaisPage() {
 								onCountryHover={handleCountryHover}
 								onCountryClick={handleCountryListClick}
 								highlightedCountry={highlightedCountry}
+								targetCountry={targetCountry}
 							/>
 						</div>
 
@@ -543,19 +744,17 @@ export default function AdivinarPaisPage() {
 						</div>
 						<div className="absolute top-1 left-1 w-1 h-1 bg-lime-400"></div>
 						<div className="absolute top-1 right-1 w-1 h-1 bg-lime-400"></div>
-					</div>
+					</div>{" "}
 					<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-purple-400/50 shadow-xl relative overflow-hidden p-3 text-center">
 						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-400/10 to-transparent opacity-50 pointer-events-none"></div>
 						<div className="relative z-10">
 							<div className="text-xl md:text-2xl font-bold text-purple-400 font-mono">
-								{guesses.length}
+								{user?.total_wins || 0}
 							</div>
 							<div className="text-xs md:text-sm text-purple-300 font-mono">
-								Países
+								VICTORIAS
 							</div>
 						</div>
-						<div className="absolute top-1 left-1 w-1 h-1 bg-purple-400"></div>
-						<div className="absolute top-1 right-1 w-1 h-1 bg-purple-400"></div>
 					</div>
 				</div>
 
@@ -604,88 +803,13 @@ export default function AdivinarPaisPage() {
 						</div>
 					</div>
 				</details>
-
-				{/* Modal de estadísticas - Estilo cyberpunk */}
-				{showStats && gameStats && (
-					<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-						<div className="bg-gray-900/95 backdrop-blur-sm border-2 border-cyan-400 shadow-2xl max-w-md w-full relative overflow-hidden">
-							{/* Efectos de scanline */}
-							<div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent opacity-50 pointer-events-none"></div>
-
-							<div className="relative z-10 p-6">
-								<div className="flex justify-between items-center mb-4">
-									<h2 className="text-xl font-bold text-cyan-400 font-mono tracking-wider">
-										📊 &gt; ESTADÍSTICAS
-									</h2>
-									<button
-										onClick={() => setShowStats(false)}
-										className="text-lime-400 hover:text-cyan-400 text-2xl font-mono transition-colors"
-									>
-										[X]
-									</button>
-								</div>
-
-								<div className="grid grid-cols-2 gap-4 mb-6">
-									<div className="text-center bg-black/50 p-3 border border-cyan-400/30">
-										<div className="text-2xl font-bold text-cyan-400 font-mono">
-											{gameStats.gamesPlayed}
-										</div>
-										<div className="text-sm text-cyan-300 font-mono">
-											Partidas jugadas
-										</div>
-									</div>
-									<div className="text-center bg-black/50 p-3 border border-lime-400/30">
-										<div className="text-2xl font-bold text-lime-400 font-mono">
-											{gameStats.averageGuesses}
-										</div>
-										<div className="text-sm text-lime-300 font-mono">
-											Promedio intentos
-										</div>
-									</div>
-									<div className="text-center bg-black/50 p-3 border border-purple-400/30">
-										<div className="text-2xl font-bold text-purple-400 font-mono">
-											{gameStats.currentStreak}
-										</div>
-										<div className="text-sm text-purple-300 font-mono">
-											Racha actual
-										</div>
-									</div>
-									<div className="text-center bg-black/50 p-3 border border-pink-400/30">
-										<div className="text-2xl font-bold text-pink-400 font-mono">
-											{gameStats.maxStreak}
-										</div>
-										<div className="text-sm text-pink-300 font-mono">
-											Mejor racha
-										</div>
-									</div>
-								</div>
-
-								{gameStats.averageGuesses > 0 && (
-									<div className="text-center mb-4 bg-black/50 p-3 border border-cyan-400/30">
-										<div className="text-lg font-bold text-cyan-300 font-mono">
-											&gt; Promedio: {gameStats.averageGuesses}{" "}
-											intentos
-										</div>
-									</div>
-								)}
-
-								<button
-									onClick={() => setShowStats(false)}
-									className="w-full px-4 py-2 bg-gradient-to-r from-cyan-500 to-lime-500 text-black font-mono font-bold tracking-wider transition-colors pixel-button"
-								>
-									&gt; Cerrar estadísticas
-								</button>
-							</div>
-
-							{/* Píxeles decorativos */}
-							<div className="absolute top-2 left-2 w-2 h-2 bg-cyan-400 animate-pulse"></div>
-							<div className="absolute top-2 right-2 w-2 h-2 bg-lime-400 animate-pulse delay-500"></div>
-							<div className="absolute bottom-2 left-2 w-2 h-2 bg-purple-400 animate-pulse delay-1000"></div>
-							<div className="absolute bottom-2 right-2 w-2 h-2 bg-pink-400 animate-pulse delay-300"></div>
-						</div>
-					</div>
-				)}
 			</div>
+
+			{/* Modales */}
+			<RankingModal
+				isOpen={showRanking}
+				onClose={() => setShowRanking(false)}
+			/>
 		</div>
 	);
 }

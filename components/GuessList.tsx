@@ -17,6 +17,7 @@ interface GuessListProps {
 	onCountryHover?: (country: Country | null) => void;
 	onCountryClick?: (country: Country) => void; // Nueva prop para clic
 	highlightedCountry?: Country | null;
+	targetCountry?: Country | null; // Nueva prop para detectar aciertos
 }
 
 export default function GuessList({
@@ -24,11 +25,12 @@ export default function GuessList({
 	onCountryHover,
 	onCountryClick,
 	highlightedCountry,
+	targetCountry,
 }: GuessListProps) {
 	if (guesses.length === 0) {
 		return (
 			<div className="h-full flex flex-col">
-				<h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 text-center lg:text-left p-6 pb-0">
+				<h3 className="text-xl font-bold text-white mb-4 text-center lg:text-left p-6 pb-0">
 					📝 Tus Intentos
 				</h3>
 				<div className="flex-1 flex items-center justify-center p-6">
@@ -45,7 +47,7 @@ export default function GuessList({
 
 	return (
 		<div className="h-full flex flex-col p-6">
-			<h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 text-center lg:text-left">
+			<h3 className="text-xl font-bold text-white mb-4 text-center lg:text-left">
 				📝 Tus Intentos ({guesses.length})
 			</h3>
 			<div className="flex-1 space-y-3 overflow-y-auto lg:max-h-none max-h-96">
@@ -53,13 +55,17 @@ export default function GuessList({
 					const isClosest = index === 0;
 					const isHighlighted =
 						highlightedCountry?.code === guess.country.code;
+					const isCorrectGuess =
+						targetCountry?.code === guess.country.code;
 					return (
 						<div
 							key={`${guess.country.code}-${index}`}
 							className={`
                 flex items-center justify-between p-3 rounded-lg border-2 transition-all cursor-pointer
                 ${
-							isClosest
+							isCorrectGuess
+								? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-600 shadow-md"
+								: isClosest
 								? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-600 shadow-md"
 								: isHighlighted
 								? "bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600 shadow-md"
@@ -75,9 +81,9 @@ export default function GuessList({
 									<div
 										className="w-8 h-6 rounded border-2 shadow-sm p-0.5"
 										style={{
-											borderColor: getColorByDistance(
-												guess.distance
-											),
+											borderColor: isCorrectGuess
+												? "#10b981" // Verde para el país correcto
+												: getColorByDistance(guess.distance),
 										}}
 									>
 										<Image
@@ -103,7 +109,12 @@ export default function GuessList({
 											🏳️
 										</div>
 									</div>
-									{isClosest && (
+									{isCorrectGuess && (
+										<div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+											<span className="text-white text-xs">✓</span>
+										</div>
+									)}
+									{isClosest && !isCorrectGuess && (
 										<div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
 											<span className="text-white text-xs">🎯</span>
 										</div>
@@ -113,10 +124,16 @@ export default function GuessList({
 									<h4 className="font-semibold text-gray-800 dark:text-white">
 										{guess.country.name}
 									</h4>
-									{isClosest && (
+									{isCorrectGuess ? (
 										<p className="text-xs text-green-600 dark:text-green-400 font-medium">
-											¡Más cerca hasta ahora!
+											¡Acertaste! 🎉
 										</p>
+									) : (
+										isClosest && (
+											<p className="text-xs text-green-600 dark:text-green-400 font-medium">
+												¡Más cerca hasta ahora!
+											</p>
+										)
 									)}
 								</div>
 							</div>
@@ -155,6 +172,7 @@ export default function GuessList({
 }
 
 function getDistanceText(distance: number): string {
+	if (distance === 0) return "¡País fronterizo!";
 	if (distance < 100) return "¡Muy cerca!";
 	if (distance < 500) return "Cerca";
 	if (distance < 1000) return "Relativamente cerca";

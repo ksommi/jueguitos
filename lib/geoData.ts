@@ -450,7 +450,6 @@ export async function loadCountriesData(): Promise<CountryData[]> {
 				};
 			});
 
-		console.log(`Loaded ${countriesData.length} countries`);
 		return countriesData;
 	} catch (error) {
 		console.error("Error loading countries data:", error);

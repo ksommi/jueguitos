@@ -1,12 +1,6 @@
 " use client";
 
-import {
-	MapContainer,
-	TileLayer,
-	GeoJSON,
-	useMapEvents,
-	useMap,
-} from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState, useRef } from "react";
@@ -37,16 +31,6 @@ interface GameMapProps {
 	zoomToCountry?: Country | null; // Nueva prop para controlar el zoom
 }
 
-// Componente para manejar eventos del mapa
-function MapEventHandler() {
-	useMapEvents({
-		click: (e) => {
-			console.log("Map clicked at:", e.latlng);
-		},
-	});
-	return null;
-}
-
 // Componente para controlar el zoom a un país específico
 function ZoomController({
 	zoomToCountry,
@@ -65,33 +49,64 @@ function ZoomController({
 			geoJsonData &&
 			zoomToCountry !== previousCountry.current
 		) {
-			// Buscar la feature del país en el GeoJSON
-			const countryFeature = geoJsonData.features.find(
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				(feature: any) =>
-					feature.properties.name.toLowerCase() ===
-						zoomToCountry.name.toLowerCase() ||
-					feature.properties.nameEn?.toLowerCase() ===
-						zoomToCountry.name.toLowerCase()
-			);
+			// Coordenadas específicas para países problemáticos (que cruzan líneas de fecha o tienen geometrías complejas)
+			const specialCountryCoords: {
+				[key: string]: { lat: number; lng: number; zoom: number };
+			} = {
+				"Estados Unidos": { lat: 39.8283, lng: -98.5795, zoom: 4 }, // Centro geográfico de EE.UU. continental
+				Rusia: { lat: 61.524, lng: 105.3188, zoom: 3 }, // Centro de Rusia
+				Canadá: { lat: 56.1304, lng: -106.3468, zoom: 3 }, // Centro de Canadá
+				Francia: { lat: 46.2276, lng: 2.2137, zoom: 6 }, // Centro de Francia (evita territorios de ultramar)
+				"Reino Unido": { lat: 55.3781, lng: -3.436, zoom: 6 }, // Centro del Reino Unido
+			};
 
-			if (countryFeature) {
-				// Crear un layer temporal para obtener los bounds y el centro
-				const layer = L.geoJSON(countryFeature);
-				const bounds = layer.getBounds();
-				const center = bounds.getCenter(); // Obtener el centro de los bounds
-
-				// Usar setView con el centro calculado para un centrado más preciso
-				map.setView([center.lat, center.lng], 3, {
+			// Verificar si es un país con coordenadas especiales
+			if (specialCountryCoords[zoomToCountry.name]) {
+				const coords = specialCountryCoords[zoomToCountry.name];
+				map.setView([coords.lat, coords.lng], coords.zoom, {
 					animate: true,
 					duration: 1.0,
 				});
 			} else {
-				// Fallback: zoom a las coordenadas del país con zoom más alejado
-				map.setView([zoomToCountry.lat, zoomToCountry.lng], 2, {
-					animate: true,
-					duration: 1.0,
-				});
+				// Buscar la feature del país en el GeoJSON por nombre o código ISO
+				const countryFeature = geoJsonData.features.find(
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					(feature: any) => {
+						const nameMatch =
+							feature.properties.name?.toLowerCase() ===
+							zoomToCountry.name.toLowerCase();
+						const nameEnMatch =
+							feature.properties.nameEn?.toLowerCase() ===
+							zoomToCountry.name.toLowerCase();
+						const alpha2Match =
+							feature.properties["ISO3166-1-Alpha-2"] ===
+							zoomToCountry.code;
+						const alpha3Match =
+							feature.properties["ISO3166-1-Alpha-3"] ===
+							zoomToCountry.code;
+
+						return nameMatch || nameEnMatch || alpha2Match || alpha3Match;
+					}
+				);
+
+				if (countryFeature) {
+					// Crear un layer temporal para obtener los bounds y el centro
+					const layer = L.geoJSON(countryFeature);
+					const bounds = layer.getBounds();
+					const center = bounds.getCenter(); // Obtener el centro de los bounds
+
+					// Usar setView con el centro calculado para un centrado más preciso
+					map.setView([center.lat, center.lng], 3, {
+						animate: true,
+						duration: 1.0,
+					});
+				} else {
+					// Fallback: zoom a las coordenadas del país con zoom más alejado
+					map.setView([zoomToCountry.lat, zoomToCountry.lng], 2, {
+						animate: true,
+						duration: 1.0,
+					});
+				}
 			}
 
 			previousCountry.current = zoomToCountry;
@@ -174,7 +189,9 @@ export default function GameMap({
 		const guessedCountry = guessedCountries.find(
 			(g) =>
 				g.country.name.toLowerCase() === countryNameEn?.toLowerCase() ||
-				g.country.name.toLowerCase() === countryName?.toLowerCase()
+				g.country.name.toLowerCase() === countryName?.toLowerCase() ||
+				g.country.code === feature.properties["ISO3166-1-Alpha-2"] ||
+				g.country.code === feature.properties["ISO3166-1-Alpha-3"]
 		);
 
 		// Si el país no ha sido adivinado, hacerlo invisible
@@ -185,7 +202,11 @@ export default function GameMap({
 				(highlightedCountry.name.toLowerCase() ===
 					countryNameEn?.toLowerCase() ||
 					highlightedCountry.name.toLowerCase() ===
-						countryName?.toLowerCase());
+						countryName?.toLowerCase() ||
+					highlightedCountry.code ===
+						feature.properties["ISO3166-1-Alpha-2"] ||
+					highlightedCountry.code ===
+						feature.properties["ISO3166-1-Alpha-3"]);
 
 			if (!isHighlighted) {
 				return {
@@ -216,7 +237,10 @@ export default function GameMap({
 			(highlightedCountry.name.toLowerCase() ===
 				countryNameEn?.toLowerCase() ||
 				highlightedCountry.name.toLowerCase() ===
-					countryName?.toLowerCase())
+					countryName?.toLowerCase() ||
+				highlightedCountry.code ===
+					feature.properties["ISO3166-1-Alpha-2"] ||
+				highlightedCountry.code === feature.properties["ISO3166-1-Alpha-3"])
 		) {
 			weight = 4;
 			color = "#1f2937";
@@ -236,7 +260,9 @@ export default function GameMap({
 					g.country.name.toLowerCase() === targetCountry.name.toLowerCase()
 			) &&
 			(targetCountry.name.toLowerCase() === countryNameEn?.toLowerCase() ||
-				targetCountry.name.toLowerCase() === countryName?.toLowerCase())
+				targetCountry.name.toLowerCase() === countryName?.toLowerCase() ||
+				targetCountry.code === feature.properties["ISO3166-1-Alpha-2"] ||
+				targetCountry.code === feature.properties["ISO3166-1-Alpha-3"])
 		) {
 			fillColor = "#10b981"; // Verde para el país correcto
 			fillOpacity = 1.0; // Máxima opacidad para vista satelital
@@ -266,9 +292,6 @@ export default function GameMap({
 
 				if (country && onCountryClick) {
 					onCountryClick(country);
-				} else {
-					// Mostrar información del país aunque no haya sido adivinado
-					console.log(`Clicked on: ${countryName} (${countryNameEn})`);
 				}
 			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -297,7 +320,9 @@ export default function GameMap({
 		const guessedCountry = guessedCountries.find(
 			(g) =>
 				g.country.name.toLowerCase() === countryNameEn?.toLowerCase() ||
-				g.country.name.toLowerCase() === countryName?.toLowerCase()
+				g.country.name.toLowerCase() === countryName?.toLowerCase() ||
+				g.country.code === feature.properties["ISO3166-1-Alpha-2"] ||
+				g.country.code === feature.properties["ISO3166-1-Alpha-3"]
 		);
 
 		// Solo mostrar tooltip si el país ya fue adivinado
@@ -391,8 +416,6 @@ export default function GameMap({
 					zoomToCountry={zoomToCountry || null}
 					geoJsonData={geoJsonData}
 				/>
-
-				<MapEventHandler />
 			</MapContainer>
 		</div>
 	);

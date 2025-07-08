@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/components/AuthProvider";
+import { ErrorProvider } from "@/components/ErrorProvider";
+import { ErrorModal } from "@/components/ErrorModal";
+import { ErrorSetup } from "@/components/ErrorSetup";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -104,7 +108,13 @@ export default function RootLayout({
 				</div>
 
 				{/* Contenido de la aplicación */}
-				<div className="relative z-10">{children}</div>
+				<ErrorProvider>
+					<AuthProvider>
+						<ErrorSetup />
+						<div className="relative z-10">{children}</div>
+						<ErrorModal />
+					</AuthProvider>
+				</ErrorProvider>
 			</body>
 		</html>
 	);
