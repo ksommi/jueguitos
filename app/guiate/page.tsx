@@ -20,6 +20,8 @@ import { AuthModal } from "@/components/AuthProvider";
 
 import CountryInput from "@/components/CountryInput";
 import GuessList from "@/components/GuessList";
+import GameInstructionsModal from "@/components/GameInstructionsModal";
+import VictoryModal from "@/components/VictoryModal";
 
 // Importar el mapa dinámicamente para evitar problemas de SSR
 const GameMap = dynamic(() => import("@/components/GameMap"), {
@@ -54,12 +56,21 @@ export default function GuiateGamePage() {
 	const [gameCompleted, setGameCompleted] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [showAuthModal, setShowAuthModal] = useState(false);
+	const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
 	const [ranking, setRanking] = useState<RankingEntry[]>([]);
 	const [rankingLoading, setRankingLoading] = useState(true);
+	const [showInstructions, setShowInstructions] = useState(true);
+	const [showVictoryModal, setShowVictoryModal] = useState(false);
 
-	// Inicializar el juego
+	// Inicializar el juego solo si hay usuario
 	useEffect(() => {
 		const initializeGame = async () => {
+			// Solo inicializar si hay usuario
+			if (!user) {
+				setLoading(false);
+				return;
+			}
+
 			try {
 				setLoading(true);
 
@@ -96,10 +107,8 @@ export default function GuiateGamePage() {
 
 				setTargetCountry(country);
 
-				// Si hay usuario, cargar progreso
-				if (user && !userLoading) {
-					await loadUserProgress(user, todayCountryData.id, country);
-				}
+				// Cargar progreso del usuario
+				await loadUserProgress(user, todayCountryData.id, country);
 			} catch (error) {
 				console.error("Error inicializando el juego:", error);
 			} finally {
@@ -128,6 +137,17 @@ export default function GuiateGamePage() {
 
 		loadRanking();
 	}, []);
+
+	// Mostrar instrucciones al cargar por primera vez
+	useEffect(() => {
+		const hasSeenInstructions = localStorage.getItem(
+			"guiate-instructions-seen"
+		);
+		if (!hasSeenInstructions && user) {
+			setShowInstructions(true);
+			localStorage.setItem("guiate-instructions-seen", "true");
+		}
+	}, [user]);
 
 	const loadUserProgress = async (
 		user: User,
@@ -426,6 +446,8 @@ export default function GuiateGamePage() {
 		if (isWon) {
 			setGameWon(true);
 			setGameCompleted(true);
+			// Mostrar modal de victoria con un pequeño delay
+			setTimeout(() => setShowVictoryModal(true), 500);
 		}
 
 		// Guardar resultado en la base de datos
@@ -501,31 +523,49 @@ export default function GuiateGamePage() {
 		}
 	};
 
-	// Mostrar modal de username si no hay usuario
+	// Mostrar modal de registro si no hay usuario
 	if (!userLoading && !user) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
+			<div className="min-h-screen flex items-center justify-center bg-gray-900">
 				<div className="text-center max-w-md mx-auto p-6">
 					<div className="mb-6">
 						<h1 className="text-4xl font-bold text-cyan-400 font-mono mb-4">
 							🌍 GUIATE
 						</h1>
-						<p className="text-cyan-300 font-mono">
-							Necesitas un nombre de usuario para guardar tu progreso
+						<p className="text-cyan-300 font-mono mb-4">
+							Registro requerido para jugar
+						</p>
+						<p className="text-cyan-300/80 font-mono text-sm">
+							Crea tu perfil para competir en el ranking diario
 						</p>
 					</div>
 
-					<button
-						onClick={() => setShowAuthModal(true)}
-						className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-lime-500 text-black font-mono font-bold tracking-wider transition-all duration-300 hover:scale-105"
-					>
-						&gt; CREAR JUGADOR
-					</button>
+					<div className="flex flex-col gap-3">
+						<button
+							onClick={() => {
+								setAuthMode("signup");
+								setShowAuthModal(true);
+							}}
+							className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-lime-500 text-black font-mono font-bold tracking-wider transition-all duration-300 hover:scale-105"
+						>
+							✨ REGISTRARSE
+						</button>
+						<button
+							onClick={() => {
+								setAuthMode("login");
+								setShowAuthModal(true);
+							}}
+							className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-mono font-bold tracking-wider transition-all duration-300 hover:scale-105"
+						>
+							🔑 INICIAR SESIÓN
+						</button>
+					</div>
 				</div>
 
 				<AuthModal
 					isOpen={showAuthModal}
 					onClose={() => setShowAuthModal(false)}
+					initialMode={authMode}
 				/>
 			</div>
 		);
@@ -568,7 +608,7 @@ export default function GuiateGamePage() {
 								/>
 							</svg>
 							<span className="font-medium text-sm md:text-base tracking-wider">
-								&lt; VOLVER
+								VOLVER
 							</span>
 						</Link>
 
@@ -581,7 +621,7 @@ export default function GuiateGamePage() {
 						<div className="flex items-center space-x-2">
 							{user && (
 								<div className="px-3 py-2 bg-cyan-600/80 backdrop-blur-sm text-white font-mono text-sm border border-cyan-400/50">
-									👤 {user.username}
+									😃 {user.username}
 								</div>
 							)}
 						</div>
@@ -590,188 +630,126 @@ export default function GuiateGamePage() {
 			</div>
 
 			<div className="container mx-auto px-4 py-4 space-y-4">
-				{/* Instrucciones - Estilo terminal */}
-				<details className="bg-gray-900/80 backdrop-blur-sm border-2 border-lime-400/50 shadow-xl relative overflow-hidden">
-					<summary className="p-4 cursor-pointer font-bold text-lime-400 text-center font-mono tracking-wider hover:text-cyan-400 transition-colors">
-						📖 &gt; Cómo jugar [expandir]
-					</summary>
-					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-lime-400/5 to-transparent opacity-50 pointer-events-none"></div>
-					<div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-cyan-300 relative z-10">
-						<div className="bg-black/30 p-3 border border-cyan-400/30">
-							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
-								🎯 OBJETIVO
-							</h4>
-							<p className="font-mono text-xs">
-								&gt; Adivina el país secreto en la menor cantidad de
-								intentos posible.
-							</p>
-						</div>
-						<div className="bg-black/30 p-3 border border-cyan-400/30">
-							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
-								🎨 COLORES
-							</h4>
-							<p className="font-mono text-xs">
-								&gt; Los países aparecen en el mapa con colores según su
-								distancia.
-							</p>
-						</div>
-						<div className="bg-black/30 p-3 border border-cyan-400/30">
-							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
-								📏 DISTANCIA
-							</h4>
-							<p className="font-mono text-xs">
-								&gt; La lista muestra todos tus intentos ordenados de
-								más cerca a más lejos.
-							</p>
-						</div>
-						<div className="bg-black/30 p-3 border border-cyan-400/30">
-							<h4 className="font-semibold mb-1 text-lime-400 font-mono tracking-wider">
-								⌨️ CONTROLES
-							</h4>
-							<p className="font-mono text-xs">
-								&gt; Escribe el nombre del país y usa las flechas para
-								navegar.
-							</p>
-						</div>
-					</div>
-				</details>
-				{/* Input para adivinar - Estilo gamer */}
-				<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-cyan-400/50 shadow-xl relative overflow-hidden p-4">
+				{/* Card principal del juego - Optimizado para móvil */}
+				<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-cyan-400/50 shadow-xl relative overflow-hidden">
 					{/* Efectos de scanline sutiles */}
 					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/5 to-transparent opacity-50 pointer-events-none"></div>
 
-					<div className="max-w-2xl mx-auto relative z-10">
-						<CountryInput
-							onGuess={handleGuess}
-							disabled={gameWon || gameCompleted}
-							alreadyGuessed={alreadyGuessed}
-						/>
+					<div className="relative z-10 p-4 space-y-4">
+						{/* INPUT - Siempre visible arriba */}
+						<div className="max-w-2xl mx-auto">
+							<CountryInput
+								onGuess={handleGuess}
+								disabled={gameWon || gameCompleted || !user}
+								alreadyGuessed={alreadyGuessed}
+							/>
+						</div>
+
+						{/* Estado del juego - Compacto */}
+						{gameWon && (
+							<div className="bg-lime-400/10 border border-lime-400/30 rounded-lg p-3 text-center">
+								<h2 className="text-lg font-bold text-lime-400 mb-1 font-mono tracking-wider">
+									🎉 ¡GANASTE!
+								</h2>
+								<p className="text-cyan-300 text-sm font-mono">
+									<span className="font-bold text-white">
+										{targetCountry.name}
+									</span>{" "}
+									en {attempts} intentos
+								</p>
+							</div>
+						)}
+
+						{/* MAPA Y LISTA - Layout responsivo */}
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+							{/* MAPA */}
+							<div className="bg-black/30 border border-cyan-400/30 rounded-lg overflow-hidden">
+								<div className="h-[250px] md:h-[350px] lg:h-[400px] w-full relative">
+									<GameMap
+										targetCountry={targetCountry}
+										guessedCountries={guesses}
+										onMapReady={() => setMapReady(true)}
+										onCountryClick={handleCountryClick}
+										highlightedCountry={highlightedCountry}
+										zoomToCountry={zoomToCountry}
+									/>
+								</div>
+								{!mapReady && (
+									<div className="text-center py-2 text-cyan-400 text-xs font-mono">
+										<p>&gt; Cargando mapa...</p>
+										<div className="flex justify-center mt-1">
+											<div className="w-1 h-1 bg-cyan-400 animate-bounce mr-1"></div>
+											<div className="w-1 h-1 bg-cyan-400 animate-bounce delay-100 mr-1"></div>
+											<div className="w-1 h-1 bg-cyan-400 animate-bounce delay-200"></div>
+										</div>
+									</div>
+								)}
+							</div>
+
+							{/* LISTA DE INTENTOS */}
+							<div className="bg-black/30 border border-purple-400/30 rounded-lg overflow-hidden lg:h-[400px] lg:flex lg:flex-col">
+								<div className="flex-1 overflow-hidden">
+									<GuessList
+										guesses={guesses}
+										onCountryHover={handleCountryHover}
+										onCountryClick={handleCountryListClick}
+										highlightedCountry={highlightedCountry}
+										targetCountry={targetCountry}
+									/>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					{/* Píxeles decorativos */}
 					<div className="absolute top-2 left-2 w-2 h-2 bg-cyan-400 animate-pulse"></div>
 					<div className="absolute top-2 right-2 w-2 h-2 bg-lime-400 animate-pulse delay-500"></div>
+					<div className="absolute bottom-2 left-2 w-2 h-2 bg-purple-400 animate-pulse delay-1000"></div>
+					<div className="absolute bottom-2 right-2 w-2 h-2 bg-pink-400 animate-pulse delay-300"></div>
 				</div>
 
-				{/* Estado del juego - Estilo gamer */}
-				{gameWon ? (
-					<div className="bg-gray-900/90 backdrop-blur-sm border-2 border-lime-400 shadow-xl relative overflow-hidden p-4">
-						{/* Efecto de celebración */}
-						<div className="absolute inset-0 bg-gradient-to-r from-lime-400/10 via-cyan-400/10 to-purple-400/10 animate-pulse"></div>
+				{/* Modal de instrucciones */}
+				<GameInstructionsModal
+					isOpen={showInstructions}
+					onClose={() => setShowInstructions(false)}
+				/>
 
-						<div className="relative z-10">
-							<h2 className="text-lg md:text-xl font-bold text-lime-400 mb-2 text-center font-mono tracking-wider pixel-title">
-								🎉 ¡VICTORIA CONSEGUIDA!
-							</h2>
-							<p className="text-cyan-300 text-center mb-4 font-mono">
-								¡Completaste{" "}
-								<span className="font-bold text-white">
-									{targetCountry.name}
-								</span>{" "}
-								en {attempts} intentos!
-							</p>
-
-							<div className="flex flex-wrap gap-2 justify-center">
-								<button
-									onClick={shareOnWhatsApp}
-									className="px-4 py-2 bg-green-600 text-white font-mono hover:bg-green-500 transition-colors"
-								>
-									📱 WhatsApp
-								</button>
-								<button
-									onClick={copyToClipboard}
-									className="px-4 py-2 bg-blue-600 text-white font-mono hover:bg-blue-500 transition-colors"
-								>
-									📋 Copiar
-								</button>
-							</div>
+				{/* Instrucciones compactas al pie de la página */}
+				<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-cyan-400/50 shadow-xl relative overflow-hidden p-3 text-center">
+					<p className="text-sm text-cyan-300 mb-2 font-mono">
+						&gt; Adivina el país secreto
+					</p>
+					<div className="flex justify-center items-center space-x-3 text-xs font-mono">
+						<div className="flex items-center space-x-1">
+							<div className="w-2 h-2 bg-red-600"></div>
+							<span className="text-cyan-300">CERCA</span>
 						</div>
-
-						{/* Píxeles de celebración */}
-						<div className="absolute top-2 left-2 w-3 h-3 bg-lime-400 animate-ping"></div>
-						<div className="absolute top-2 right-2 w-3 h-3 bg-cyan-400 animate-ping delay-300"></div>
-						<div className="absolute bottom-2 left-2 w-3 h-3 bg-purple-400 animate-ping delay-600"></div>
-						<div className="absolute bottom-2 right-2 w-3 h-3 bg-pink-400 animate-ping delay-900"></div>
-					</div>
-				) : (
-					<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-purple-400/50 shadow-xl relative overflow-hidden p-4">
-						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-400/5 to-transparent opacity-50 pointer-events-none"></div>
-
-						<div className="relative z-10">
-							<p className="text-sm md:text-base text-cyan-300 mb-3 text-center font-mono">
-								&gt; Adivina el país secreto
-							</p>
-							<div className="flex justify-center items-center space-x-4 text-xs md:text-sm font-mono">
-								<div className="flex items-center space-x-1">
-									<div className="w-3 h-3 bg-red-600"></div>
-									<span className="text-cyan-300">CERCA</span>
-								</div>
-								<div className="flex items-center space-x-1">
-									<div className="w-3 h-3 bg-yellow-500"></div>
-									<span className="text-cyan-300">LEJOS</span>
-								</div>
-								<div className="flex items-center space-x-1">
-									<div className="w-3 h-3 bg-yellow-300"></div>
-									<span className="text-cyan-300">MUY LEJOS</span>
-								</div>
-							</div>
+						<div className="flex items-center space-x-1">
+							<div className="w-2 h-2 bg-yellow-500"></div>
+							<span className="text-cyan-300">LEJOS</span>
+						</div>
+						<div className="flex items-center space-x-1">
+							<div className="w-2 h-2 bg-yellow-300"></div>
+							<span className="text-cyan-300">MUY LEJOS</span>
 						</div>
 					</div>
-				)}
-
-				{/* Mapa y Lista - Layout responsivo con estilo gamer */}
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-					{/* Mapa - Estilo cyberpunk */}
-					<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-cyan-400/50 shadow-xl relative overflow-hidden p-4">
-						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/5 to-transparent opacity-50 pointer-events-none"></div>
-
-						<div className="h-[300px] md:h-[400px] lg:h-[500px] w-full relative z-10">
-							<GameMap
-								targetCountry={targetCountry}
-								guessedCountries={guesses}
-								onMapReady={() => setMapReady(true)}
-								onCountryClick={handleCountryClick}
-								highlightedCountry={highlightedCountry}
-								zoomToCountry={zoomToCountry}
-							/>
-						</div>
-						{!mapReady && (
-							<div className="text-center mt-2 text-cyan-400 text-sm font-mono relative z-10">
-								<p>&gt; Cargando mapa...</p>
-								<div className="flex justify-center mt-1">
-									<div className="w-2 h-2 bg-cyan-400 animate-bounce mr-1"></div>
-									<div className="w-2 h-2 bg-cyan-400 animate-bounce delay-100 mr-1"></div>
-									<div className="w-2 h-2 bg-cyan-400 animate-bounce delay-200"></div>
-								</div>
-							</div>
-						)}
-
-						{/* Píxeles decorativos */}
-						<div className="absolute top-2 left-2 w-2 h-2 bg-cyan-400 animate-pulse"></div>
-						<div className="absolute top-2 right-2 w-2 h-2 bg-lime-400 animate-pulse delay-500"></div>
-						<div className="absolute bottom-2 left-2 w-2 h-2 bg-purple-400 animate-pulse delay-1000"></div>
-						<div className="absolute bottom-2 right-2 w-2 h-2 bg-pink-400 animate-pulse delay-300"></div>
-					</div>
-
-					{/* Lista de intentos con estilo retro */}
-					<div className="bg-gray-900/80 backdrop-blur-sm border-2 border-purple-400/50 shadow-xl relative overflow-hidden lg:h-[568px] lg:flex lg:flex-col">
-						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-400/5 to-transparent opacity-50 pointer-events-none"></div>
-
-						<div className="relative z-10 flex-1 overflow-hidden">
-							<GuessList
-								guesses={guesses}
-								onCountryHover={handleCountryHover}
-								onCountryClick={handleCountryListClick}
-								highlightedCountry={highlightedCountry}
-								targetCountry={targetCountry}
-							/>
-						</div>
-
-						{/* Píxeles decorativos */}
-						<div className="absolute top-2 left-2 w-2 h-2 bg-purple-400 animate-pulse"></div>
-						<div className="absolute top-2 right-2 w-2 h-2 bg-cyan-400 animate-pulse delay-700"></div>
-					</div>
+					<button
+						onClick={() => setShowInstructions(true)}
+						className="mt-3 px-4 py-1 bg-cyan-600/30 border border-cyan-400/50 text-cyan-300 font-mono text-xs hover:bg-cyan-600/50 transition-colors"
+					>
+						📖 ¿Cómo jugar?
+					</button>
 				</div>
+
+				{/* Modal de victoria */}
+				<VictoryModal
+					isOpen={showVictoryModal}
+					onClose={() => setShowVictoryModal(false)}
+					countryName={targetCountry?.name || ""}
+					attempts={attempts}
+					onShareWhatsApp={shareOnWhatsApp}
+					onCopyToClipboard={copyToClipboard}
+				/>
 
 				{/* Estadísticas compactas con estilo arcade */}
 				<div className="grid grid-cols-3 gap-3">

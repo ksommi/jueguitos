@@ -146,19 +146,24 @@ export function useAuth() {
 export function AuthModal({
 	isOpen,
 	onClose,
+	initialMode = "signup",
 }: {
 	isOpen: boolean;
 	onClose: () => void;
+	initialMode?: "login" | "signup";
 }) {
-	const [mode, setMode] = useState<"login" | "signup" | "anonymous">(
-		"anonymous"
-	);
+	const [mode, setMode] = useState<"login" | "signup">(initialMode);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [username, setUsername] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
-	const { signInAnonymous, signUp, signIn } = useAuth();
+	const { signUp, signIn } = useAuth();
+
+	// Actualizar el modo si cambia el initialMode
+	useEffect(() => {
+		setMode(initialMode);
+	}, [initialMode]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -168,9 +173,7 @@ export function AuthModal({
 		try {
 			let success = false;
 
-			if (mode === "anonymous") {
-				success = await signInAnonymous();
-			} else if (mode === "signup") {
+			if (mode === "signup") {
 				if (!username.trim() || username.length < 3) {
 					setError(
 						"El nombre de usuario debe tener al menos 3 caracteres"
@@ -222,18 +225,8 @@ export function AuthModal({
 
 						<div className="flex gap-2 mb-6">
 							<button
-								onClick={() => setMode("anonymous")}
-								className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-									mode === "anonymous"
-										? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/25 border border-cyan-400/50"
-										: "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-600/30 hover:border-purple-500/50"
-								}`}
-							>
-								👤 Anónimo
-							</button>
-							<button
 								onClick={() => setMode("login")}
-								className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+								className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex-1 ${
 									mode === "login"
 										? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/25 border border-purple-400/50"
 										: "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-600/30 hover:border-purple-500/50"
@@ -243,7 +236,7 @@ export function AuthModal({
 							</button>
 							<button
 								onClick={() => setMode("signup")}
-								className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+								className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex-1 ${
 									mode === "signup"
 										? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg shadow-pink-500/25 border border-pink-400/50"
 										: "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-600/30 hover:border-purple-500/50"
@@ -254,62 +247,48 @@ export function AuthModal({
 						</div>
 
 						<form onSubmit={handleSubmit} className="space-y-4">
-							{mode === "anonymous" ? (
-								<div className="bg-gray-800/30 border border-gray-600/30 rounded-lg p-4 backdrop-blur-sm">
-									<p className="text-gray-300 text-sm text-center">
-										🎭 Continúa como usuario anónimo. Podrás jugar
-										pero no se guardarán tus estadísticas
-										permanentemente.
-									</p>
+							{mode === "signup" && (
+								<div>
+									<label className="block text-sm font-medium text-gray-300 mb-2">
+										👤 Nombre de usuario
+									</label>
+									<input
+										type="text"
+										value={username}
+										onChange={(e) => setUsername(e.target.value)}
+										className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white placeholder-gray-400 transition-all duration-200 backdrop-blur-sm"
+										placeholder="Elige un nombre de usuario"
+										required
+									/>
 								</div>
-							) : (
-								<>
-									{mode === "signup" && (
-										<div>
-											<label className="block text-sm font-medium text-gray-300 mb-2">
-												👤 Nombre de usuario
-											</label>
-											<input
-												type="text"
-												value={username}
-												onChange={(e) =>
-													setUsername(e.target.value)
-												}
-												className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white placeholder-gray-400 transition-all duration-200 backdrop-blur-sm"
-												placeholder="Elige un nombre de usuario"
-												required
-											/>
-										</div>
-									)}
-									<div>
-										<label className="block text-sm font-medium text-gray-300 mb-2">
-											📧 Email
-										</label>
-										<input
-											type="email"
-											value={email}
-											onChange={(e) => setEmail(e.target.value)}
-											className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white placeholder-gray-400 transition-all duration-200 backdrop-blur-sm"
-											placeholder="tu@email.com"
-											required
-										/>
-									</div>
-									<div>
-										<label className="block text-sm font-medium text-gray-300 mb-2">
-											🔒 Contraseña
-										</label>
-										<input
-											type="password"
-											value={password}
-											onChange={(e) => setPassword(e.target.value)}
-											className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white placeholder-gray-400 transition-all duration-200 backdrop-blur-sm"
-											placeholder="••••••••"
-											required
-											minLength={6}
-										/>
-									</div>
-								</>
 							)}
+							<div>
+								<label className="block text-sm font-medium text-gray-300 mb-2">
+									📧 Email
+								</label>
+								<input
+									type="email"
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+									className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white placeholder-gray-400 transition-all duration-200 backdrop-blur-sm"
+									placeholder="tu@email.com"
+									required
+								/>
+							</div>
+							<div>
+								<label className="block text-sm font-medium text-gray-300 mb-2">
+									🔒 Contraseña
+								</label>
+								<input
+									type="password"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 text-white placeholder-gray-400 transition-all duration-200 backdrop-blur-sm"
+									placeholder="••••••••"
+									required
+									minLength={6}
+								/>
+							</div>
 
 							{error && (
 								<div className="bg-red-900/30 border border-red-500/50 rounded-lg p-3 backdrop-blur-sm">
@@ -334,8 +313,6 @@ export function AuthModal({
 								>
 									{loading
 										? "⏳ Cargando..."
-										: mode === "anonymous"
-										? "🚀 Continuar"
 										: mode === "signup"
 										? "✨ Registrarse"
 										: "🔑 Iniciar Sesión"}

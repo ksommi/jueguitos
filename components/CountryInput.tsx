@@ -167,7 +167,7 @@ export default function CountryInput({
 							key={`${country.code}-${country.name}-${index}`}
 							onClick={() => handleSelectCountry(country)}
 							className={`
-								w-full text-left px-4 py-3 hover:bg-cyan-400/20 transition-colors border-b border-cyan-400/20 last:border-b-0 font-mono
+								w-full text-left px-3 py-2 hover:bg-cyan-400/20 transition-colors border-b border-cyan-400/20 last:border-b-0 font-mono text-sm
 								${index === selectedIndex ? "bg-lime-400/20 border-lime-400/30" : ""}
 							`}
 						>
@@ -179,14 +179,14 @@ export default function CountryInput({
 						</button>
 					))
 				) : query.trim().length >= 3 ? (
-					<div className="px-4 py-3 text-cyan-500 italic text-center font-mono">
+					<div className="px-3 py-2 text-cyan-500 italic text-center font-mono text-sm">
 						&gt; No se encontraron países: &quot;{query}&quot;
 					</div>
 				) : null}
 
 				{/* Mensaje cuando hay menos de 3 letras */}
 				{query.trim().length > 0 && query.trim().length < 3 && (
-					<div className="px-4 py-3 text-purple-400 text-center text-sm font-mono border-purple-400/50">
+					<div className="px-3 py-2 text-purple-400 text-center text-sm font-mono border-purple-400/50">
 						&gt; Escribe al menos 3 letras...
 					</div>
 				)}
@@ -218,7 +218,7 @@ export default function CountryInput({
 							: "Escribe el nombre de un país..."
 					}
 					className={`
-            w-full px-4 py-3 text-lg border-2 focus:outline-none focus:ring-2 transition-all font-mono
+            w-full px-3 py-2 text-base border-2 focus:outline-none focus:ring-2 transition-all font-mono
             ${
 					disabled
 						? "bg-gray-900/50 border-gray-600/50 text-gray-500 cursor-not-allowed backdrop-blur-sm"
@@ -228,9 +228,9 @@ export default function CountryInput({
 				/>
 				<div className="absolute right-3 top-1/2 transform -translate-y-1/2">
 					{disabled ? (
-						<span className="text-2xl">🏆</span>
+						<span className="text-lg">🏆</span>
 					) : (
-						<span className="text-cyan-400 text-xl">🌍</span>
+						<span className="text-cyan-400 text-lg">🌍</span>
 					)}
 				</div>
 			</div>
