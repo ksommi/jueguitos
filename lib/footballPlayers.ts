@@ -297,3 +297,51 @@ export function isCorrectAnswer(
 		)
 	);
 }
+
+/**
+ * Genera la fecha de hoy en formato string
+ */
+function getTodayDateString(): string {
+	const today = new Date();
+	const day = String(today.getDate()).padStart(2, "0");
+	const month = String(today.getMonth() + 1).padStart(2, "0");
+	const year = today.getFullYear();
+	return `${day}/${month}/${year}`;
+}
+
+/**
+ * Función para generar el resultado en emojis para compartir
+ */
+export function generateShareText(
+	guesses: string[],
+	won: boolean,
+	attempts: number
+): string {
+	const today = getTodayDateString();
+
+	let result = `⚽ Adivina el Futbolista ${today}\n`;
+	result += won ? `✅ ${attempts} intentos` : `❌ ${attempts} intentos`;
+	result += "\n\n";
+
+	// Generar emojis basados en los intentos
+	guesses.forEach((guess, index) => {
+		// Si ganó y es el último intento, siempre verde
+		if (won && index === guesses.length - 1) {
+			result += "🟩";
+		} else {
+			// Intento fallido
+			result += "🟥";
+		}
+	});
+
+	// Agregar cuadrados grises para los intentos restantes si no ganó
+	if (!won) {
+		const remainingAttempts = 6 - attempts;
+		for (let i = 0; i < remainingAttempts; i++) {
+			result += "⬜";
+		}
+	}
+
+	result += "\n\n🎮 ¡Jugá en: https://jueguitos-psi.vercel.app/futbolista";
+	return result;
+}

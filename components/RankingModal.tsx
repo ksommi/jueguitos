@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getRanking, RankingEntry } from "@/lib/supabase";
+import { useState, useEffect, useCallback } from "react";
+import { getRanking, getPlayerGameRanking, RankingEntry } from "@/lib/supabase";
 
 export default function RankingModal({
 	isOpen,
@@ -9,33 +9,38 @@ export default function RankingModal({
 	embedded = false,
 	title = "🏆 RANKING DIARIO",
 	subtitle = "Los mejores jugadores del día",
+	gameType = "geography", // "geography" o "football"
 }: {
 	isOpen: boolean;
 	onClose: () => void;
 	embedded?: boolean;
 	title?: string;
 	subtitle?: string;
+	gameType?: "geography" | "football";
 }) {
 	const [ranking, setRanking] = useState<RankingEntry[]>([]);
 	const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		if (isOpen || embedded) {
-			loadRanking();
-		}
-	}, [isOpen, embedded]);
-
-	const loadRanking = async () => {
+	const loadRanking = useCallback(async () => {
 		setLoading(true);
 		try {
-			const data = await getRanking(50);
+			const data =
+				gameType === "football"
+					? await getPlayerGameRanking()
+					: await getRanking(50);
 			setRanking(data);
 		} catch (error) {
 			console.error("Error loading ranking:", error);
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [gameType]);
+
+	useEffect(() => {
+		if (isOpen || embedded) {
+			loadRanking();
+		}
+	}, [isOpen, embedded, loadRanking]);
 
 	if (!isOpen) return null;
 

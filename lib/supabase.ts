@@ -699,7 +699,10 @@ export async function testSupabaseConnection(): Promise<boolean> {
 
 export async function getPlayerGameRanking(): Promise<RankingEntry[]> {
 	try {
-		const { data, error } = await supabase.rpc("get_player_game_ranking");
+		const { data, error } = await supabase
+			.from("player_game_ranking_view")
+			.select("*")
+			.limit(50);
 
 		if (error) {
 			throw new Error(`Error obteniendo ranking: ${error.message}`);
@@ -719,7 +722,7 @@ export async function getPlayerGameRanking(): Promise<RankingEntry[]> {
 				best_streak: number;
 				average_attempts: number;
 			}) => ({
-				user_id: "", // No disponible directamente desde la función
+				user_id: "", // No disponible directamente desde la vista
 				username: entry.username,
 				total_wins: entry.total_wins,
 				current_streak: entry.current_streak,
@@ -730,6 +733,7 @@ export async function getPlayerGameRanking(): Promise<RankingEntry[]> {
 			})
 		);
 	} catch (error) {
+		console.error("Error detallado:", error);
 		handleGlobalError(error, "obtener ranking del juego de jugadores");
 		return [];
 	}

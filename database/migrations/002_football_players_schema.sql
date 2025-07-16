@@ -89,38 +89,3 @@ BEGIN
     COALESCE((SELECT AVG(attempts) FROM user_results WHERE won = true), 0)::DECIMAL(4,2) as average_attempts;
 END;
 $$ LANGUAGE plpgsql;
-
--- 5. Función para obtener el ranking del juego de jugadores
-CREATE OR REPLACE FUNCTION get_player_game_ranking()
-RETURNS TABLE(
-  username VARCHAR(50),
-  total_games INTEGER,
-  total_wins INTEGER,
-  win_rate DECIMAL(5,2),
-  current_streak INTEGER,
-  best_streak INTEGER,
-  average_attempts DECIMAL(4,2)
-) AS $$
-BEGIN
-  RETURN QUERY
-  SELECT 
-    u.username,
-    COUNT(pgr.id)::INTEGER as total_games,
-    COUNT(CASE WHEN pgr.won THEN 1 END)::INTEGER as total_wins,
-    CASE 
-      WHEN COUNT(pgr.id) > 0 THEN 
-        ROUND((COUNT(CASE WHEN pgr.won THEN 1 END)::DECIMAL / COUNT(pgr.id)::DECIMAL * 100), 2)
-      ELSE 0
-    END as win_rate,
-    COALESCE(stats.current_streak, 0) as current_streak,
-    COALESCE(stats.best_streak, 0) as best_streak,
-    COALESCE(stats.average_attempts, 0) as average_attempts
-  FROM users u
-  LEFT JOIN player_game_results pgr ON u.id = pgr.user_id
-  LEFT JOIN LATERAL get_player_game_stats(u.id) stats ON true
-  GROUP BY u.id, u.username, stats.current_streak, stats.best_streak, stats.average_attempts
-  HAVING COUNT(pgr.id) > 0
-  ORDER BY win_rate DESC, total_wins DESC, average_attempts ASC
-  LIMIT 50;
-END;
-$$ LANGUAGE plpgsql;

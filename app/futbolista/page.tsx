@@ -7,6 +7,7 @@ import {
 	getUserPlayerGameResult,
 	DailyPlayer,
 } from "@/lib/supabase";
+import { generateShareText } from "@/lib/footballPlayers";
 import GameInstructionsModal from "@/components/GameInstructionsModal";
 import VictoryModal from "@/components/VictoryModal";
 import RankingModal from "@/components/RankingModal";
@@ -253,6 +254,40 @@ export default function AdivinarJugador() {
 		}
 	};
 
+	// Función para compartir en WhatsApp
+	const shareOnWhatsApp = () => {
+		if (!gameState.currentPlayer) return;
+
+		const shareText = generateShareText(
+			gameState.guesses,
+			gameState.gameStatus === "won",
+			gameState.attempts
+		);
+		const encodedText = encodeURIComponent(shareText);
+		const whatsappUrl = `https://wa.me/?text=${encodedText}`;
+
+		window.open(whatsappUrl, "_blank");
+	};
+
+	// Función para copiar resultado al portapapeles
+	const copyToClipboard = async () => {
+		if (!gameState.currentPlayer) return;
+
+		const shareText = generateShareText(
+			gameState.guesses,
+			gameState.gameStatus === "won",
+			gameState.attempts
+		);
+
+		try {
+			await navigator.clipboard.writeText(shareText);
+			alert("¡Resultado copiado al portapapeles!");
+		} catch (err) {
+			console.error("Error al copiar:", err);
+			alert("Error al copiar el resultado");
+		}
+	};
+
 	const renderGameContent = () => {
 		if (gameState.gameStatus === "loading") {
 			return (
@@ -340,21 +375,43 @@ export default function AdivinarJugador() {
 
 				{/* Historial de intentos */}
 				{gameState.guesses.length > 0 && (
-					<div className="bg-red-900/20 border-2 border-red-600/30 rounded-lg p-4 shadow-lg">
-						<h4 className="text-sm font-semibold text-red-300 mb-2 font-mono flex items-center gap-2">
-							<span className="w-2 h-2 bg-red-400 rounded-full"></span>
-							INTENTOS FALLIDOS:
+					<div className="bg-gray-900/20 border-2 border-gray-600/30 rounded-lg p-4 shadow-lg">
+						<h4 className="text-sm font-semibold text-gray-300 mb-2 font-mono flex items-center gap-2">
+							<span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+							HISTORIAL DE INTENTOS:
 						</h4>
 						<div className="space-y-1">
-							{gameState.guesses.map((guess, index) => (
-								<div
-									key={index}
-									className="flex items-center gap-2 text-sm font-mono"
-								>
-									<span className="text-red-400">✗</span>
-									<span className="text-red-200">{guess}</span>
-								</div>
-							))}
+							{gameState.guesses.map((guess, index) => {
+								// Verificar si es el último intento y el juego fue ganado
+								const isCorrect =
+									gameState.gameStatus === "won" &&
+									index === gameState.guesses.length - 1;
+
+								return (
+									<div
+										key={index}
+										className={`flex items-center gap-2 text-sm font-mono ${
+											isCorrect ? "text-green-200" : "text-red-200"
+										}`}
+									>
+										<span
+											className={
+												isCorrect
+													? "text-green-400"
+													: "text-red-400"
+											}
+										>
+											{isCorrect ? "✓" : "✗"}
+										</span>
+										<span className="flex-1">{guess}</span>
+										{isCorrect && (
+											<span className="text-green-400 text-xs">
+												¡CORRECTO!
+											</span>
+										)}
+									</div>
+								);
+							})}
 						</div>
 					</div>
 				)}
@@ -410,7 +467,7 @@ export default function AdivinarJugador() {
 					<div className="bg-gradient-to-br from-gray-900/80 to-green-900/40 border-2 border-green-600/50 rounded-lg p-6 shadow-lg shadow-green-900/30 text-center">
 						{gameState.gameStatus === "won" ? (
 							<div className="text-green-400">
-								<div className="text-6xl mb-4">�</div>
+								<div className="text-6xl mb-4">⚽</div>
 								<h3 className="text-2xl font-bold mb-2 font-mono tracking-wider">
 									¡GOOOOOOOOL!
 								</h3>
@@ -433,7 +490,7 @@ export default function AdivinarJugador() {
 							</div>
 						) : (
 							<div className="text-red-400">
-								<div className="text-6xl mb-4">�</div>
+								<div className="text-6xl mb-4">🟥</div>
 								<h3 className="text-2xl font-bold mb-2 font-mono tracking-wider">
 									¡TARJETA ROJA!
 								</h3>
@@ -552,8 +609,8 @@ export default function AdivinarJugador() {
 					}
 					attempts={gameState.attempts}
 					countryName={gameState.correctAnswer}
-					onShareWhatsApp={() => {}}
-					onCopyToClipboard={() => {}}
+					onShareWhatsApp={shareOnWhatsApp}
+					onCopyToClipboard={copyToClipboard}
 				/>
 
 				<RankingModal
@@ -563,6 +620,7 @@ export default function AdivinarJugador() {
 					}
 					title="🏆 RANKING - ADIVINA EL FUTBOLISTA"
 					subtitle="Los mejores jugadores del juego de fútbol"
+					gameType="football"
 				/>
 
 				{gameState.showError && (
