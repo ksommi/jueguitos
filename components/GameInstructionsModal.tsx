@@ -5,11 +5,23 @@ import { useState, useEffect } from "react";
 interface GameInstructionsModalProps {
 	isOpen: boolean;
 	onClose: () => void;
+	title?: string;
+	instructions?: string[];
 }
 
 export default function GameInstructionsModal({
 	isOpen,
 	onClose,
+	title = "🌍 CÓMO JUGAR GUIATE",
+	instructions = [
+		"Todos los días aparece un nuevo país para adivinar.",
+		"Te mostramos una silueta del país en el mapa.",
+		"Tienes que adivinar de qué país se trata.",
+		"Puedes escribir el nombre del país en español.",
+		"El juego acepta tanto nombres oficiales como informales.",
+		"¡Solo tienes una oportunidad por día!",
+		"Comparte tus resultados y compite con otros jugadores.",
+	],
 }: GameInstructionsModalProps) {
 	const [mounted, setMounted] = useState(false);
 
@@ -36,7 +48,7 @@ export default function GameInstructionsModal({
 				<div className="relative z-10 p-6 border-b border-cyan-400/30">
 					<div className="flex items-center justify-between">
 						<h2 className="text-2xl font-bold text-cyan-400 font-mono tracking-wider">
-							🌍 CÓMO JUGAR GUIATE
+							{title}
 						</h2>
 						<button
 							onClick={onClose}
@@ -49,81 +61,19 @@ export default function GameInstructionsModal({
 
 				{/* Content */}
 				<div className="relative z-10 p-6 space-y-6">
-					{/* Objetivo principal */}
+					{/* Instrucciones principales */}
 					<div className="bg-lime-400/10 border border-lime-400/30 rounded-lg p-4">
-						<h3 className="text-lg font-bold text-lime-400 font-mono mb-2">
-							🎯 OBJETIVO
+						<h3 className="text-lg font-bold text-lime-400 font-mono mb-3">
+							📋 INSTRUCCIONES
 						</h3>
-						<p className="text-cyan-300 font-mono text-sm">
-							Adivina el país secreto del día en la menor cantidad de
-							intentos posible.
-						</p>
-					</div>
-
-					{/* Cómo jugar */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div className="bg-black/30 p-4 border border-cyan-400/30 rounded-lg">
-							<h4 className="font-semibold mb-2 text-cyan-400 font-mono tracking-wider">
-								⌨️ CONTROLES
-							</h4>
-							<ul className="text-cyan-300 font-mono text-sm space-y-1">
-								<li>• Escribe el nombre del país</li>
-								<li>• Usa las flechas para navegar</li>
-								<li>• Presiona Enter para confirmar</li>
-							</ul>
-						</div>
-
-						<div className="bg-black/30 p-4 border border-cyan-400/30 rounded-lg">
-							<h4 className="font-semibold mb-2 text-purple-400 font-mono tracking-wider">
-								🎨 COLORES EN EL MAPA
-							</h4>
-							<div className="space-y-2 text-sm font-mono">
-								<div className="flex items-center space-x-2">
-									<div className="w-3 h-3 bg-red-600 rounded"></div>
-									<span className="text-cyan-300">
-										CERCA (0-1000km)
-									</span>
-								</div>
-								<div className="flex items-center space-x-2">
-									<div className="w-3 h-3 bg-yellow-500 rounded"></div>
-									<span className="text-cyan-300">
-										LEJOS (1000-5000km)
-									</span>
-								</div>
-								<div className="flex items-center space-x-2">
-									<div className="w-3 h-3 bg-yellow-300 rounded"></div>
-									<span className="text-cyan-300">
-										MUY LEJOS (+5000km)
-									</span>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					{/* Estrategia */}
-					<div className="bg-purple-400/10 border border-purple-400/30 rounded-lg p-4">
-						<h3 className="text-lg font-bold text-purple-400 font-mono mb-2">
-							💡 ESTRATEGIA
-						</h3>
-						<ul className="text-cyan-300 font-mono text-sm space-y-1">
-							<li>
-								• Empieza con países grandes como Brasil, China, o Rusia
-							</li>
-							<li>• Observa los colores en el mapa para orientarte</li>
-							<li>• La lista de intentos se ordena por distancia</li>
-							<li>• Países fronterizos tienen distancia 0</li>
+						<ul className="text-cyan-300 font-mono text-sm space-y-2">
+							{instructions.map((instruction, index) => (
+								<li key={index} className="flex items-start space-x-2">
+									<span className="text-lime-400">•</span>
+									<span>{instruction}</span>
+								</li>
+							))}
 						</ul>
-					</div>
-
-					{/* Puntuación */}
-					<div className="bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-4">
-						<h3 className="text-lg font-bold text-yellow-400 font-mono mb-2">
-							🏆 PUNTUACIÓN
-						</h3>
-						<p className="text-cyan-300 font-mono text-sm">
-							Compite en el ranking diario. Menos intentos = mejor
-							puntuación. ¡Cada día hay un nuevo país secreto!
-						</p>
 					</div>
 
 					{/* Botón de continuar */}

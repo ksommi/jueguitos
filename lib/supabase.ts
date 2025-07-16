@@ -31,6 +31,17 @@ export interface DailyCountry {
 	created_at: string;
 }
 
+export interface DailyPlayer {
+	id: number;
+	date: string; // formato YYYY-MM-DD
+	player_name: string;
+	player_surname: string;
+	surname_is_unique: boolean;
+	player_wikidata_id: string;
+	clubs: string[];
+	created_at: string;
+}
+
 export interface User {
 	id: string;
 	username: string;
@@ -50,6 +61,16 @@ export interface GameResult {
 	won: boolean;
 	attempts: number;
 	guesses: string[]; // JSON array de países adivinados
+	completed_at: string;
+}
+
+export interface PlayerGameResult {
+	id: number;
+	user_id: string;
+	daily_player_id: number;
+	won: boolean;
+	attempts: number;
+	guesses: string[]; // JSON array de jugadores adivinados
 	completed_at: string;
 }
 
@@ -90,6 +111,46 @@ export async function getTodayCountry(): Promise<DailyCountry | null> {
 		return result.data;
 	} catch (error) {
 		handleGlobalError(error, "obtener país del día");
+		return null;
+	}
+}
+
+// Funciones para manejar jugadores diarios
+export async function getTodayPlayer(): Promise<DailyPlayer | null> {
+	try {
+		const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+		const { data: existing, error: existingError } = await supabase
+			.from("daily_players")
+			.select("*")
+			.eq("date", today)
+			.single();
+
+		if (existing && !existingError) {
+			return existing;
+		}
+
+		// Usar la API route para crear el jugador del día
+		const response = await fetch("/api/daily-player");
+		const result = await response.json();
+
+		if (result.error) {
+			throw new Error(`Error de API: ${result.error}`);
+		}
+
+		// Construir el objeto DailyPlayer con los datos recibidos
+		return {
+			id: result.id,
+			date: result.date,
+			player_name: "", // No se revela hasta que se adivine
+			player_surname: "", // No se revela hasta que se adivine
+			surname_is_unique: false, // No se revela hasta que se adivine
+			player_wikidata_id: result.wikidata_id,
+			clubs: result.clubs,
+			created_at: new Date().toISOString(),
+		};
+	} catch (error) {
+		handleGlobalError(error, "obtener jugador del día");
 		return null;
 	}
 }
@@ -373,7 +434,8 @@ export async function saveGameResult(
 
 		// Actualizar estadísticas del usuario solo si ganó (para evitar múltiples actualizaciones)
 		if (won) {
-			await updateUserStats(userId);
+			// TODO: Implementar función para actualizar estadísticas del juego de países
+			// await updateUserStatsFromCountryGame(userId);
 		}
 
 		return true;
@@ -417,72 +479,156 @@ export async function getUserGameResult(
 	}
 }
 
-async function updateUserStats(userId: string): Promise<void> {
+// Funciones para manejar resultados del juego de jugadores
+export async function savePlayerGameResult(
+	userId: string,
+	dailyPlayerId: number,
+	won: boolean,
+	attempts: number,
+	guesses: string[]
+): Promise<boolean> {
 	try {
-		// Obtener todas las estadísticas del usuario
-		const { data: results, error } = await supabase
-			.from("game_results")
-			.select("won, attempts")
+		// Verificar si ya existe un resultado para este usuario y jugador diario
+		const { data: existingResult, error: existingError } = await supabase
+			.from("player_game_results")
+			.select("*")
 			.eq("user_id", userId)
-			.order("completed_at", { ascending: false });
+			.eq("daily_player_id", dailyPlayerId)
+			.single();
 
-		if (error || !results) {
+		if (existingError && existingError.code !== "PGRST116") {
 			throw new Error(
-				`Error obteniendo resultados del usuario: ${
-					error?.message || "Sin resultados"
-				}`
+				`Error verificando resultado existente: ${existingError.message}`
 			);
 		}
 
-		const totalGames = results.length;
-		const totalWins = results.filter((r) => r.won).length;
-		const averageAttempts =
-			totalGames > 0
-				? Math.round(
-						(results.reduce((sum, r) => sum + r.attempts, 0) /
-							totalGames) *
-							100
-				  ) / 100
-				: 0;
+		if (existingResult) {
+			// Ya existe, actualizar si es necesario
+			const { error: updateError } = await supabase
+				.from("player_game_results")
+				.update({
+					won,
+					attempts,
+					guesses: JSON.stringify(guesses),
+				})
+				.eq("user_id", userId)
+				.eq("daily_player_id", dailyPlayerId)
+				.select();
 
-		// Calcular racha actual
-		let currentStreak = 0;
-		for (const result of results) {
-			if (result.won) {
-				currentStreak++;
-			} else {
-				break;
+			if (updateError) {
+				throw new Error(
+					`Error actualizando resultado del juego: ${updateError.message}`
+				);
+			}
+		} else {
+			// No existe, insertar nuevo registro
+			const { error: insertError } = await supabase
+				.from("player_game_results")
+				.insert([
+					{
+						user_id: userId,
+						daily_player_id: dailyPlayerId,
+						won,
+						attempts,
+						guesses: JSON.stringify(guesses),
+					},
+				])
+				.select();
+
+			if (insertError) {
+				throw new Error(
+					`Error insertando resultado del juego: ${insertError.message}`
+				);
 			}
 		}
 
-		// Calcular mejor racha
-		let bestStreak = 0;
-		let tempStreak = 0;
-		for (const result of results.reverse()) {
-			if (result.won) {
-				tempStreak++;
-				bestStreak = Math.max(bestStreak, tempStreak);
-			} else {
-				tempStreak = 0;
-			}
+		// Actualizar estadísticas del usuario solo si ganó
+		if (won) {
+			await updatePlayerUserStats(userId);
 		}
 
-		// Actualizar usuario
+		return true;
+	} catch (error) {
+		handleGlobalError(error, "guardar resultado del juego de jugadores");
+		return false;
+	}
+}
+
+export async function getUserPlayerGameResult(
+	dailyPlayerId: number
+): Promise<PlayerGameResult | null> {
+	try {
+		// Obtener el usuario autenticado actual
+		const {
+			data: { user },
+			error: authError,
+		} = await supabase.auth.getUser();
+
+		if (authError || !user) {
+			throw new Error("Usuario no autenticado");
+		}
+
+		const { data, error } = await supabase
+			.from("player_game_results")
+			.select("*")
+			.eq("user_id", user.id)
+			.eq("daily_player_id", dailyPlayerId)
+			.single();
+
+		if (error && error.code !== "PGRST116") {
+			throw new Error(
+				`Error obteniendo resultado del juego: ${error.message}`
+			);
+		}
+
+		if (!data) {
+			return null;
+		}
+
+		return {
+			...data,
+			guesses: Array.isArray(data.guesses)
+				? data.guesses
+				: JSON.parse(data.guesses || "[]"),
+		};
+	} catch (error) {
+		handleGlobalError(error, "obtener resultado del juego de jugadores");
+		return null;
+	}
+}
+
+// Función para actualizar estadísticas del usuario para el juego de jugadores
+async function updatePlayerUserStats(userId: string): Promise<void> {
+	try {
+		const { data, error } = await supabase.rpc("get_player_game_stats", {
+			user_uuid: userId,
+		});
+
+		if (error) {
+			throw new Error(`Error obteniendo estadísticas: ${error.message}`);
+		}
+
+		if (!data || data.length === 0) {
+			throw new Error("No se obtuvieron estadísticas");
+		}
+
+		const stats = data[0];
+
+		// Actualizar la tabla de usuarios con las nuevas estadísticas
 		const { error: updateError } = await supabase
 			.from("users")
 			.update({
-				total_games: totalGames,
-				total_wins: totalWins,
-				current_streak: currentStreak,
-				best_streak: bestStreak,
-				average_attempts: averageAttempts,
+				total_games: stats.total_games,
+				total_wins: stats.total_wins,
+				current_streak: stats.current_streak,
+				best_streak: stats.best_streak,
+				average_attempts: stats.average_attempts,
+				updated_at: new Date().toISOString(),
 			})
 			.eq("id", userId);
 
 		if (updateError) {
-			throw new Error(
-				`Error actualizando estadísticas del usuario: ${updateError.message}`
-			);
+			throw new Error(`Error actualizando usuario: ${updateError.message}`);
 		}
 	} catch (error) {
 		handleGlobalError(error, "actualizar estadísticas del usuario");
@@ -548,5 +694,43 @@ export async function testSupabaseConnection(): Promise<boolean> {
 	} catch (error) {
 		handleGlobalError(error, "prueba de conexión a Supabase");
 		return false;
+	}
+}
+
+export async function getPlayerGameRanking(): Promise<RankingEntry[]> {
+	try {
+		const { data, error } = await supabase.rpc("get_player_game_ranking");
+
+		if (error) {
+			throw new Error(`Error obteniendo ranking: ${error.message}`);
+		}
+
+		if (!data) {
+			return [];
+		}
+
+		return data.map(
+			(entry: {
+				username: string;
+				total_games: number;
+				total_wins: number;
+				win_rate: number;
+				current_streak: number;
+				best_streak: number;
+				average_attempts: number;
+			}) => ({
+				user_id: "", // No disponible directamente desde la función
+				username: entry.username,
+				total_wins: entry.total_wins,
+				current_streak: entry.current_streak,
+				best_streak: entry.best_streak,
+				average_attempts: entry.average_attempts,
+				total_games: entry.total_games,
+				win_percentage: entry.win_rate,
+			})
+		);
+	} catch (error) {
+		handleGlobalError(error, "obtener ranking del juego de jugadores");
+		return [];
 	}
 }

@@ -11,6 +11,15 @@ export default function Home() {
 			href: "/guiate",
 			disabled: false,
 		},
+		{
+			id: "futbolista",
+			title: "Adivina el Futbolista",
+			description:
+				"Adivina el jugador argentino basándote en los clubes donde jugó",
+			emoji: "⚽",
+			href: "/futbolista",
+			disabled: false,
+		},
 	];
 
 	return (

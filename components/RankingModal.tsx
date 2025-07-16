@@ -7,10 +7,14 @@ export default function RankingModal({
 	isOpen,
 	onClose,
 	embedded = false,
+	title = "🏆 RANKING DIARIO",
+	subtitle = "Los mejores jugadores del día",
 }: {
 	isOpen: boolean;
 	onClose: () => void;
 	embedded?: boolean;
+	title?: string;
+	subtitle?: string;
 }) {
 	const [ranking, setRanking] = useState<RankingEntry[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -43,9 +47,14 @@ export default function RankingModal({
 
 				<div className="relative z-10 p-6 h-full flex flex-col">
 					<div className="flex justify-between items-center mb-6">
-						<h2 className="text-2xl font-bold text-cyan-400 font-mono tracking-wider">
-							🏆 &gt; RANKING GLOBAL
-						</h2>
+						<div>
+							<h2 className="text-2xl font-bold text-cyan-400 font-mono tracking-wider">
+								{title}
+							</h2>
+							<p className="text-cyan-300 font-mono text-sm mt-1">
+								{subtitle}
+							</p>
+						</div>
 						<button
 							onClick={onClose}
 							className="text-lime-400 hover:text-cyan-400 text-2xl font-mono transition-colors"
