@@ -565,6 +565,7 @@ export default function GuiateGamePage() {
 				<AuthModal
 					isOpen={showAuthModal}
 					onClose={() => setShowAuthModal(false)}
+					onSuccess={() => setShowAuthModal(false)}
 					initialMode={authMode}
 				/>
 			</div>
