@@ -1,81 +1,63 @@
 // Procesador de datos para cargar jugadores argentinos
-// Este archivo procesa el JSON de Wikidata y carga los jugadores en la base de datos
+// Este archivo procesa el JSON local de jugadores y clubes
 
-export interface WikidataPlayer {
-	jugador: {
-		type: string;
-		value: string; // URL completa como "http://www.wikidata.org/entity/Q615"
-	};
-	jugadorLabel: {
-		"xml:lang": string;
-		type: string;
-		value: string; // Nombre del jugador
-	};
-}
-
-export interface WikidataResponse {
-	head: {
-		vars: string[];
-	};
-	results: {
-		bindings: WikidataPlayer[];
-	};
-}
-
-export interface WikidataClubBinding {
-	clubLabel: {
-		value: string;
-	};
+export interface LocalPlayerData {
+	nombre: string;
+	clubes: string[];
 }
 
 export interface ProcessedPlayer {
-	id: string; // ID de Wikidata (ej: Q615)
+	id: string; // ID generado basado en el nombre
 	name: string;
 	surname: string; // Apellido extraído
 	surnameIsUnique: boolean; // Si el apellido es único
-	wikidataUrl: string;
+	clubs: string[]; // Lista de clubes del jugador
 }
 
 /**
- * Extrae el ID de Wikidata de la URL completa
+ * Genera un ID único para un jugador basado en su nombre
  */
-export function extractWikidataId(url: string): string {
-	const matches = url.match(/Q\d+$/);
-	return matches ? matches[0] : "";
+export function generatePlayerId(name: string): string {
+	return name
+		.toLowerCase()
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.replace(/[^a-z0-9]/g, "")
+		.substring(0, 20);
 }
 
 /**
- * Procesa los datos del JSON de jugadores
+ * Procesa los datos del JSON local de jugadores
  */
 export function processPlayersData(
-	jsonData: WikidataResponse
+	jsonData: LocalPlayerData[]
 ): ProcessedPlayer[] {
-	if (!jsonData.results || !jsonData.results.bindings) {
-		console.error("Invalid JSON structure");
+	if (!Array.isArray(jsonData)) {
+		console.error("Invalid JSON structure: expected array");
 		return [];
 	}
 
 	const players: ProcessedPlayer[] = [];
 
-	for (const binding of jsonData.results.bindings) {
+	for (const playerData of jsonData) {
 		try {
-			const wikidataUrl = binding.jugador.value;
-			const wikidataId = extractWikidataId(wikidataUrl);
-			const name = binding.jugadorLabel.value;
+			const name = playerData.nombre;
+			const clubs = playerData.clubes;
 
-			if (wikidataId && name) {
+			if (name && clubs && Array.isArray(clubs) && clubs.length >= 3) {
+				const id = generatePlayerId(name);
 				const surname = extractSurname(name);
 
 				players.push({
-					id: wikidataId,
+					id: id,
 					name: name,
 					surname: surname,
 					surnameIsUnique: false, // Se calculará después
-					wikidataUrl: wikidataUrl,
+					clubs: clubs,
 				});
 			}
 		} catch (error) {
-			console.error("Error processing player:", binding, error);
+			console.error("Error processing player:", playerData, error);
 		}
 	}
 
@@ -84,93 +66,25 @@ export function processPlayersData(
 }
 
 /**
- * Obtiene los clubes de un jugador específico usando Wikidata
+ * Obtiene los clubes de un jugador desde los datos ya procesados
  */
-export async function getPlayerClubs(wikidataId: string): Promise<string[]> {
-	const query = `
-    SELECT DISTINCT ?clubLabel WHERE {
-      wd:${wikidataId} p:P54 ?afiliacion.
-      ?afiliacion ps:P54 ?club.
-      ?club wdt:P31 wd:Q476028.
-      SERVICE wikibase:label { bd:serviceParam wikibase:language "es". }
-    }
-    LIMIT 5
-  `;
-
-	const url = `https://query.wikidata.org/sparql?query=${encodeURIComponent(
-		query
-	)}&format=json`;
-
-	try {
-		const response = await fetch(url, {
-			headers: {
-				"User-Agent":
-					"AdiviaElFutbolista/1.0 (https://github.com/ksommi/jueguitos)",
-			},
-		});
-
-		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
-		}
-
-		const data = await response.json();
-
-		if (!data.results || !data.results.bindings) {
-			return [];
-		}
-
-		const clubs = data.results.bindings
-			.map((binding: WikidataClubBinding) => binding.clubLabel?.value)
-			.filter((club: string) => club && club.trim() !== "");
-
-		return clubs;
-	} catch (error) {
-		console.error(`Error fetching clubs for ${wikidataId}:`, error);
-		return [];
-	}
+export function getPlayerClubs(player: ProcessedPlayer): string[] {
+	return player.clubs || [];
 }
 
 /**
- * Obtiene jugadores con al menos 3 clubes
+ * Filtra jugadores que tengan al menos 3 clubes
  */
-export async function getPlayersWithClubs(
+export function getPlayersWithClubs(
 	players: ProcessedPlayer[]
-): Promise<Array<ProcessedPlayer & { clubs: string[] }>> {
-	const playersWithClubs = [];
-
-	for (const player of players) {
-		try {
-			console.log(`Fetching clubs for ${player.name} (${player.id})`);
-
-			const clubs = await getPlayerClubs(player.id);
-
-			if (clubs.length >= 3) {
-				playersWithClubs.push({
-					...player,
-					clubs: clubs.slice(0, 3), // Tomar solo los primeros 3
-				});
-
-				console.log(`✓ ${player.name}: ${clubs.slice(0, 3).join(", ")}`);
-			} else {
-				console.log(`✗ ${player.name}: Only ${clubs.length} clubs found`);
-			}
-
-			// Pausa para no saturar la API de Wikidata
-			await new Promise((resolve) => setTimeout(resolve, 500));
-		} catch (error) {
-			console.error(`Error processing ${player.name}:`, error);
-		}
-	}
-
-	return playersWithClubs;
+): ProcessedPlayer[] {
+	return players.filter((player) => player.clubs && player.clubs.length >= 3);
 }
 
 /**
  * Función para validar que un jugador tenga los datos necesarios
  */
-export function validatePlayer(
-	player: unknown
-): player is ProcessedPlayer & { clubs: string[] } {
+export function validatePlayer(player: unknown): player is ProcessedPlayer {
 	if (typeof player !== "object" || player === null) {
 		return false;
 	}
@@ -267,7 +181,7 @@ export function isCorrectAnswer(
 	const normalizedFullName = normalizeString(playerName);
 	const normalizedSurname = normalizeString(playerSurname);
 
-	// Verificar nombre completo
+	// Verificar nombre completo exacto
 	if (normalizedGuess === normalizedFullName) {
 		return true;
 	}
@@ -277,7 +191,7 @@ export function isCorrectAnswer(
 		return true;
 	}
 
-	// Verificar si la respuesta contiene las palabras clave del nombre
+	// Separar las palabras para análisis adicional
 	const guessWords = normalizedGuess
 		.split(" ")
 		.filter((word) => word.length > 0);
@@ -285,12 +199,29 @@ export function isCorrectAnswer(
 		.split(" ")
 		.filter((word) => word.length > 0);
 
-	// Si ingresó solo el apellido pero no es único, no es válido
-	if (guessWords.length === 1 && !surnameIsUnique) {
+	// Si solo ingresó una palabra y no es el apellido único, verificar si es solo el nombre de pila
+	if (guessWords.length === 1) {
+		// Si no es el apellido único, rechazar
+		if (!surnameIsUnique) {
+			return false;
+		}
+
+		// Si es el apellido único, ya se verificó arriba
 		return false;
 	}
 
-	// Verificar si todas las palabras de la respuesta están en el nombre
+	// Para múltiples palabras, verificar que contenga el apellido
+	// y que no sea solo el nombre de pila
+	const containsSurname = guessWords.some(
+		(word) =>
+			normalizedSurname.includes(word) || word.includes(normalizedSurname)
+	);
+
+	if (!containsSurname) {
+		return false;
+	}
+
+	// Verificar que todas las palabras de la respuesta estén en el nombre
 	return guessWords.every((word) =>
 		nameWords.some(
 			(nameWord) => nameWord.includes(word) || word.includes(nameWord)

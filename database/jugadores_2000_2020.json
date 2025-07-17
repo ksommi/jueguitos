@@ -1,0 +1,624 @@
+[
+	{
+		"nombre": "Santiago Silva",
+		"clubes": ["Banfield", "Boca Juniors", "Vélez Sársfield"]
+	},
+	{
+		"nombre": "Carlos Luna",
+		"clubes": ["Tigre", "River Plate", "Rosario Central"]
+	},
+	{
+		"nombre": "Fabián Cubero",
+		"clubes": ["Vélez Sársfield", "Tigre", "Atlante"]
+	},
+	{
+		"nombre": "Leandro Romagnoli",
+		"clubes": ["San Lorenzo", "Sporting Lisboa", "Veracruz"]
+	},
+	{
+		"nombre": "Sebastián Prediger",
+		"clubes": ["Colón", "Tigre", "Boca Juniors"]
+	},
+	{
+		"nombre": "Juan Román Riquelme",
+		"clubes": ["Boca Juniors", "Villarreal", "Argentinos Juniors"]
+	},
+	{
+		"nombre": "Javier Mascherano",
+		"clubes": ["River Plate", "Liverpool", "Estudiantes"]
+	},
+	{
+		"nombre": "Carlos Tevez",
+		"clubes": ["Boca Juniors", "Corinthians", "Manchester City"]
+	},
+	{
+		"nombre": "Maxi Rodríguez",
+		"clubes": ["Newell's Old Boys", "Atlético de Madrid", "Liverpool"]
+	},
+	{ "nombre": "Ezequiel Lavezzi", "clubes": ["San Lorenzo", "Napoli", "PSG"] },
+	{
+		"nombre": "Walter Erviti",
+		"clubes": ["Banfield", "Boca Juniors", "San Lorenzo"]
+	},
+	{
+		"nombre": "Darío Cvitanich",
+		"clubes": ["Banfield", "Ajax", "Racing Club"]
+	},
+	{
+		"nombre": "Andrés D'Alessandro",
+		"clubes": ["River Plate", "Internacional", "San Lorenzo"]
+	},
+	{
+		"nombre": "Ariel Ortega",
+		"clubes": ["River Plate", "Newell's Old Boys", "Fenerbahce"]
+	},
+	{
+		"nombre": "Cristian Lucchetti",
+		"clubes": ["Banfield", "Boca Juniors", "Atlético Tucumán"]
+	},
+	{
+		"nombre": "Marcos Angeleri",
+		"clubes": ["Estudiantes", "Málaga", "San Lorenzo"]
+	},
+	{
+		"nombre": "Jonathan Bottinelli",
+		"clubes": ["San Lorenzo", "River Plate", "Arsenal"]
+	},
+	{
+		"nombre": "David Trezeguet",
+		"clubes": ["River Plate", "Juventus", "Newell's Old Boys"]
+	},
+	{
+		"nombre": "Gabriel Hauche",
+		"clubes": ["Racing Club", "Argentinos Juniors", "Toluca"]
+	},
+	{
+		"nombre": "Ricardo Centurión",
+		"clubes": ["Racing Club", "Boca Juniors", "San Pablo"]
+	},
+	{
+		"nombre": "Christian Gómez",
+		"clubes": ["Nueva Chicago", "Arsenal", "DC United"]
+	},
+	{
+		"nombre": "Jesús Dátolo",
+		"clubes": ["Boca Juniors", "Banfield", "Napoli"]
+	},
+	{
+		"nombre": "Matías Caruzzo",
+		"clubes": ["Argentinos Juniors", "San Lorenzo", "Boca Juniors"]
+	},
+	{
+		"nombre": "Ignacio Scocco",
+		"clubes": ["Newell's Old Boys", "Pumas UNAM", "River Plate"]
+	},
+	{
+		"nombre": "Rodrigo Palacio",
+		"clubes": ["Boca Juniors", "Genoa", "Inter"]
+	},
+	{
+		"nombre": "Julio Buffarini",
+		"clubes": ["Talleres", "San Lorenzo", "Boca Juniors"]
+	},
+	{
+		"nombre": "Agustín Orion",
+		"clubes": ["San Lorenzo", "Boca Juniors", "Racing Club"]
+	},
+	{
+		"nombre": "Javier Saviola",
+		"clubes": ["River Plate", "Barcelona", "Benfica"]
+	},
+	{
+		"nombre": "Pablo Guiñazú",
+		"clubes": ["Newell's Old Boys", "Internacional", "Talleres"]
+	},
+	{
+		"nombre": "Pablo Barrientos",
+		"clubes": ["San Lorenzo", "Catania", "Toluca"]
+	},
+	{
+		"nombre": "Pablo Ledesma",
+		"clubes": ["Boca Juniors", "Catania", "Colón"]
+	},
+	{
+		"nombre": "Nicolás Navarro",
+		"clubes": ["Argentinos Juniors", "San Lorenzo", "Tigres"]
+	},
+	{
+		"nombre": "Sergio Marchi",
+		"clubes": ["Racing Club", "Huracán", "Mandiyú"]
+	},
+	{
+		"nombre": "Rubén Capria",
+		"clubes": ["Racing Club", "Estudiantes", "Lanús"]
+	},
+	{
+		"nombre": "Nelson Vivas",
+		"clubes": ["Quilmes", "Arsenal", "River Plate"]
+	},
+	{
+		"nombre": "Raúl Cardozo",
+		"clubes": ["Vélez Sársfield", "Chacarita Juniors", "Olimpo"]
+	},
+	{
+		"nombre": "Milton Caraglio",
+		"clubes": ["Rosario Central", "Godoy Cruz", "Tijuana"]
+	},
+	{
+		"nombre": "Cristian Chávez",
+		"clubes": ["San Lorenzo", "Napoli", "Aldosivi"]
+	},
+	{
+		"nombre": "Diego Cagna",
+		"clubes": ["Boca Juniors", "Independiente", "Atlético Tucumán"]
+	},
+	{
+		"nombre": "Martín Palermo",
+		"clubes": ["Boca Juniors", "Villarreal", "Estudiantes"]
+	},
+	{
+		"nombre": "Juan Sebastián Verón",
+		"clubes": ["Estudiantes", "Manchester United", "Inter"]
+	},
+	{
+		"nombre": "Emiliano Papa",
+		"clubes": ["Vélez Sársfield", "Rosario Central", "Independiente"]
+	},
+	{
+		"nombre": "Sebastián Domínguez",
+		"clubes": ["Vélez Sársfield", "Estudiantes", "Newell's Old Boys"]
+	},
+	{
+		"nombre": "Juan Manuel Martínez",
+		"clubes": ["Vélez Sársfield", "Boca Juniors", "Al-Shabab"]
+	},
+	{
+		"nombre": "Lucas Pratto",
+		"clubes": ["Vélez Sársfield", "Atlético Mineiro", "River Plate"]
+	},
+	{
+		"nombre": "Fernando Gago",
+		"clubes": ["Boca Juniors", "Real Madrid", "Vélez Sársfield"]
+	},
+	{
+		"nombre": "Luciano Figueroa",
+		"clubes": ["Rosario Central", "River Plate", "Genoa"]
+	},
+	{
+		"nombre": "Andrés Silvera",
+		"clubes": ["Independiente", "San Lorenzo", "Arsenal"]
+	},
+	{
+		"nombre": "Leonel Núñez",
+		"clubes": ["Argentinos Juniors", "Independiente", "Olympiakos"]
+	},
+	{
+		"nombre": "Facundo Sava",
+		"clubes": ["Gimnasia LP", "Racing Club", "Fulham"]
+	},
+	{
+		"nombre": "Matías Suárez",
+		"clubes": ["Belgrano", "Anderlecht", "River Plate"]
+	},
+	{
+		"nombre": "Santiago Gentiletti",
+		"clubes": ["Argentinos Juniors", "San Lorenzo", "Lazio"]
+	},
+	{ "nombre": "Lisandro López", "clubes": ["Racing Club", "Oporto", "Lyon"] },
+	{
+		"nombre": "Marco Ruben",
+		"clubes": ["Rosario Central", "Villarreal", "Dinamo Kiev"]
+	},
+	{
+		"nombre": "Patricio Toranzo",
+		"clubes": ["Huracán", "Racing Club", "River Plate"]
+	},
+	{
+		"nombre": "Néstor Ortigoza",
+		"clubes": ["Argentinos Juniors", "San Lorenzo", "Rosario Central"]
+	},
+	{
+		"nombre": "Enzo Pérez",
+		"clubes": ["Estudiantes", "Benfica", "River Plate"]
+	},
+	{
+		"nombre": "Germán Lux",
+		"clubes": ["River Plate", "Mallorca", "Deportivo La Coruña"]
+	},
+	{
+		"nombre": "Sebastián Saja",
+		"clubes": ["San Lorenzo", "Racing Club", "Gimnasia LP"]
+	},
+	{
+		"nombre": "Cristian Villagra",
+		"clubes": ["River Plate", "Rosario Central", "Metalist"]
+	},
+	{
+		"nombre": "Matías Almeyda",
+		"clubes": ["River Plate", "Lazio", "Quilmes"]
+	},
+	{
+		"nombre": "Federico Insúa",
+		"clubes": ["Argentinos Juniors", "Boca Juniors", "Independiente"]
+	},
+	{ "nombre": "Diego Milito", "clubes": ["Racing Club", "Inter", "Genoa"] },
+	{
+		"nombre": "Hernán Barcos",
+		"clubes": ["Racing Club", "Sporting CP", "LDU Quito"]
+	},
+	{
+		"nombre": "Ezequiel Garay",
+		"clubes": ["Newell's Old Boys", "Real Madrid", "Valencia"]
+	},
+	{
+		"nombre": "Mario Bolatti",
+		"clubes": ["Belgrano", "Huracán", "Fiorentina"]
+	},
+	{
+		"nombre": "Aldo Duscher",
+		"clubes": ["Newell's Old Boys", "Racing Santander", "Sevilla"]
+	},
+	{
+		"nombre": "Gabriel Mercado",
+		"clubes": ["River Plate", "Estudiantes", "Sevilla"]
+	},
+	{
+		"nombre": "Leonardo Ponzio",
+		"clubes": ["River Plate", "Zaragoza", "Newell's Old Boys"]
+	},
+	{ "nombre": "Ariel Garcé", "clubes": ["Colón", "River Plate", "Olimpo"] },
+	{
+		"nombre": "Carlos Sánchez",
+		"clubes": ["River Plate", "Godoy Cruz", "Santos Laguna"]
+	},
+	{ "nombre": "Omar Bravo", "clubes": ["Banfield", "Chivas", "La Coruña"] },
+	{
+		"nombre": "Claudio Morel Rodríguez",
+		"clubes": ["San Lorenzo", "Boca Juniors", "Dep. La Coruña"]
+	},
+	{
+		"nombre": "Clemente Rodríguez",
+		"clubes": ["Boca Juniors", "Estudiantes", "San Pablo"]
+	},
+	{ "nombre": "Hernán Crespo", "clubes": ["River Plate", "Parma", "Inter"] },
+	{
+		"nombre": "Pablo Migliore",
+		"clubes": ["San Lorenzo", "Huracán", "Peñarol"]
+	},
+	{
+		"nombre": "Martín Demichelis",
+		"clubes": ["River Plate", "Bayern Múnich", "Málaga"]
+	},
+	{
+		"nombre": "Oscar Ustari",
+		"clubes": ["Independiente", "Boca Juniors", "Getafe"]
+	},
+	{
+		"nombre": "Emanuel Gigliotti",
+		"clubes": ["Independiente", "Colón", "Chongqing Lifan"]
+	},
+	{
+		"nombre": "Lucas Alario",
+		"clubes": ["Colón", "River Plate", "Bayer Leverkusen"]
+	},
+	{
+		"nombre": "Lautaro Acosta",
+		"clubes": ["Lanús", "Sevilla", "Boca Juniors"]
+	},
+	{ "nombre": "José Sand", "clubes": ["Lanús", "Colón", "River Plate"] },
+	{
+		"nombre": "Ignacio Piatti",
+		"clubes": ["San Lorenzo", "Independiente", "Montreal Impact"]
+	},
+	{
+		"nombre": "Gabriel Heinze",
+		"clubes": ["Newell's Old Boys", "Manchester United", "Real Madrid"]
+	},
+	{
+		"nombre": "Juan Pablo Carrizo",
+		"clubes": ["River Plate", "Lazio", "Monterrey"]
+	},
+	{
+		"nombre": "Javier Pinola",
+		"clubes": ["Rosario Central", "Núremberg", "River Plate"]
+	},
+	{
+		"nombre": "Martín Galmarini",
+		"clubes": ["Tigre", "River Plate", "Atlético Tucumán"]
+	},
+	{
+		"nombre": "Mario Yepes",
+		"clubes": ["River Plate", "Milan", "San Lorenzo"]
+	},
+	{
+		"nombre": "Gastón Nicolás Aguirre",
+		"clubes": ["San Lorenzo", "Banfield", "Temperley"]
+	},
+	{
+		"nombre": "Norberto Paparatto",
+		"clubes": ["Tigre", "Rosario Central", "Portland Timbers"]
+	},
+	{
+		"nombre": "Santiago Salcedo",
+		"clubes": ["Newell's Old Boys", "River Plate", "Banfield"]
+	},
+	{
+		"nombre": "Ezequiel Videla",
+		"clubes": ["Instituto", "Racing Club", "Colón"]
+	},
+	{ "nombre": "Hugo Ibarra", "clubes": ["Boca Juniors", "Porto", "Monaco"] },
+	{
+		"nombre": "Bernardo Romeo",
+		"clubes": ["San Lorenzo", "Hamburgo", "Osasuna"]
+	},
+	{
+		"nombre": "Sebastián Méndez",
+		"clubes": ["San Lorenzo", "Banfield", "Celta Vigo"]
+	},
+	{
+		"nombre": "Jonathan Schunke",
+		"clubes": ["Estudiantes", "Almagro", "Mitre"]
+	},
+	{
+		"nombre": "Rodrigo Braña",
+		"clubes": ["Estudiantes", "Quilmes", "Boca Juniors"]
+	},
+	{
+		"nombre": "Mariano Andújar",
+		"clubes": ["Estudiantes", "Catania", "Palermo"]
+	},
+	{
+		"nombre": "Ezequiel Unsain",
+		"clubes": ["Newell's Old Boys", "Defensa y Justicia", "Unión"]
+	},
+	{
+		"nombre": "Pablo Pérez",
+		"clubes": ["Newell's Old Boys", "Boca Juniors", "Málaga"]
+	},
+	{
+		"nombre": "Iván Pillud",
+		"clubes": ["Racing Club", "Newell's Old Boys", "Espanyol"]
+	},
+	{
+		"nombre": "Fernando Belluschi",
+		"clubes": ["River Plate", "San Lorenzo", "Porto"]
+	},
+	{
+		"nombre": "Pablo Pintos",
+		"clubes": ["San Lorenzo", "Defensor Sporting", "Getafe"]
+	},
+	{
+		"nombre": "Diego Valeri",
+		"clubes": ["Lanús", "Portland Timbers", "Porto"]
+	},
+	{
+		"nombre": "Maximiliano Moralez",
+		"clubes": ["Vélez Sársfield", "Atalanta", "Racing Club"]
+	},
+	{
+		"nombre": "Matías Pisano",
+		"clubes": ["Independiente", "Cruzeiro", "Aldosivi"]
+	},
+	{ "nombre": "Iván Marcone", "clubes": ["Lanús", "Cruz Azul", "Elche"] },
+	{
+		"nombre": "Marcos Díaz",
+		"clubes": ["Huracán", "Boca Juniors", "Talleres"]
+	},
+	{
+		"nombre": "Cristian Pavón",
+		"clubes": ["Boca Juniors", "Talleres", "LA Galaxy"]
+	},
+	{
+		"nombre": "Andrés Chávez",
+		"clubes": ["Banfield", "Boca Juniors", "Panathinaikos"]
+	},
+	{
+		"nombre": "Lucas Zelarayán",
+		"clubes": ["Belgrano", "Tigres", "Columbus Crew"]
+	},
+	{
+		"nombre": "Ignacio Fernández",
+		"clubes": ["River Plate", "Gimnasia LP", "Atlético Mineiro"]
+	},
+	{
+		"nombre": "Leonardo Sigali",
+		"clubes": ["Racing Club", "Godoy Cruz", "Dinamo Zagreb"]
+	},
+	{
+		"nombre": "Carlos Matheu",
+		"clubes": ["Independiente", "Atalanta", "Defensa y Justicia"]
+	},
+	{
+		"nombre": "Emiliano Insúa",
+		"clubes": ["Boca Juniors", "Liverpool", "Stuttgart"]
+	},
+	{
+		"nombre": "Franco Armani",
+		"clubes": ["River Plate", "Atlético Nacional", "Ferro Carril Oeste"]
+	},
+	{
+		"nombre": "Diego Buonanotte",
+		"clubes": ["River Plate", "Málaga", "Universidad Católica"]
+	},
+	{
+		"nombre": "Claudio Bieler",
+		"clubes": ["Racing Club", "Liga de Quito", "Belgrano"]
+	},
+	{
+		"nombre": "Lucas Barrios",
+		"clubes": ["Argentinos Juniors", "Borussia Dortmund", "Gremio"]
+	},
+	{
+		"nombre": "Juan Cazares",
+		"clubes": ["Banfield", "Independiente del Valle", "Atlético Mineiro"]
+	},
+	{
+		"nombre": "Cristian Arano",
+		"clubes": ["Huracán", "Real Santa Cruz", "Bolívar"]
+	},
+	{
+		"nombre": "Diego Barrado",
+		"clubes": ["River Plate", "Atlético Tucumán", "Olimpo"]
+	},
+	{
+		"nombre": "Víctor Zapata",
+		"clubes": ["River Plate", "Vélez Sársfield", "Independiente"]
+	},
+	{
+		"nombre": "Sergio Almirón",
+		"clubes": ["Newell's Old Boys", "Juventus", "Fiorentina"]
+	},
+	{
+		"nombre": "Ricardo Noir",
+		"clubes": ["Boca Juniors", "Racing Club", "Universidad Católica"]
+	},
+	{
+		"nombre": "Luciano Leguizamón",
+		"clubes": ["Arsenal", "Independiente", "Gimnasia LP"]
+	},
+	{
+		"nombre": "Emilio Zelaya",
+		"clubes": ["Rosario Central", "Banfield", "Apollon Limassol"]
+	},
+	{
+		"nombre": "Cristian Menéndez",
+		"clubes": ["Lanús", "Atlético Tucumán", "Veracruz"]
+	},
+	{
+		"nombre": "Facundo Bertoglio",
+		"clubes": ["Colón", "Dínamo Kiev", "Patronato"]
+	},
+	{
+		"nombre": "Juan Sánchez Miño",
+		"clubes": ["Boca Juniors", "Estudiantes", "Independiente"]
+	},
+	{
+		"nombre": "Nicolás Blandi",
+		"clubes": ["Boca Juniors", "San Lorenzo", "Colo Colo"]
+	},
+	{
+		"nombre": "Iván Moreno y Fabianesi",
+		"clubes": ["Colón", "Rosario Central", "Estudiantes"]
+	},
+	{
+		"nombre": "Germán Denis",
+		"clubes": ["Talleres", "Independiente", "Atalanta"]
+	},
+	{
+		"nombre": "Lucas Viatri",
+		"clubes": ["Boca Juniors", "Banfield", "Peñarol"]
+	},
+	{
+		"nombre": "Sebastián Leto",
+		"clubes": ["Lanús", "Panathinaikos", "Liverpool"]
+	},
+	{
+		"nombre": "Diego Rivero",
+		"clubes": ["San Lorenzo", "Boca Juniors", "Chacarita Juniors"]
+	},
+	{ "nombre": "Adrián Peralta", "clubes": ["Lanús", "Huracán", "Mallorca"] },
+	{
+		"nombre": "Maximiliano Rodríguez",
+		"clubes": ["Newell's Old Boys", "Atlético Madrid", "Liverpool"]
+	},
+	{
+		"nombre": "Carlos Carbonero",
+		"clubes": ["Arsenal", "River Plate", "Cali"]
+	},
+	{
+		"nombre": "Hernán Bernardello",
+		"clubes": ["Newell's Old Boys", "Almería", "Cruz Azul"]
+	},
+	{
+		"nombre": "Agustín Alayes",
+		"clubes": ["Estudiantes", "Quilmes", "Colón"]
+	},
+	{
+		"nombre": "Javier Gandolfi",
+		"clubes": ["River Plate", "Arsenal", "Tijuana"]
+	},
+	{
+		"nombre": "Franco Niell",
+		"clubes": ["Argentinos Juniors", "Gimnasia LP", "Quilmes"]
+	},
+	{
+		"nombre": "Andrés Guglielminpietro",
+		"clubes": ["Gimnasia LP", "Milan", "Inter"]
+	},
+	{
+		"nombre": "Emanuel Rivas",
+		"clubes": ["Independiente", "Bari", "Inter"]
+	},
+	{
+		"nombre": "Federico Higuaín",
+		"clubes": ["River Plate", "Godoy Cruz", "Columbus Crew"]
+	},
+	{
+		"nombre": "Lucas Castromán",
+		"clubes": ["Vélez Sársfield", "Lazio", "Boca Juniors"]
+	},
+	{
+		"nombre": "Martín Morel",
+		"clubes": ["Tigre", "All Boys", "Deportivo Cali"]
+	},
+	{
+		"nombre": "Cristian Nasuti",
+		"clubes": ["River Plate", "Banfield", "Emelec"]
+	},
+	{
+		"nombre": "Carlos Fondacaro",
+		"clubes": ["Boca Juniors", "Tigre", "Huracán"]
+	},
+	{
+		"nombre": "Jonathan Santana",
+		"clubes": ["San Lorenzo", "River Plate", "Wolfsburgo"]
+	},
+	{
+		"nombre": "Santiago Raymonda",
+		"clubes": ["Quilmes", "Argentinos Juniors", "Arsenal"]
+	},
+	{
+		"nombre": "Carlos Arano",
+		"clubes": ["Racing Club", "Huracán", "River Plate"]
+	},
+	{
+		"nombre": "Jorge Achucarro",
+		"clubes": ["Newell's Old Boys", "Atlas", "Guaraní"]
+	},
+	{
+		"nombre": "Néstor Silvera",
+		"clubes": ["Independiente", "San Lorenzo", "Tigres"]
+	},
+	{
+		"nombre": "Cristian Tula",
+		"clubes": ["San Lorenzo", "River Plate", "Independiente"]
+	},
+	{
+		"nombre": "Pablo Lugüercio",
+		"clubes": ["Estudiantes", "Racing Club", "Arsenal"]
+	},
+	{
+		"nombre": "Carlos Bueno",
+		"clubes": ["Boca Juniors", "San Lorenzo", "Peñarol"]
+	},
+	{
+		"nombre": "Sebastián Washington Abreu",
+		"clubes": ["San Lorenzo", "River Plate", "Central Español"]
+	},
+	{
+		"nombre": "Juan Manuel Insaurralde",
+		"clubes": ["Chacarita Juniors", "Boca Juniors", "Newell's Old Boys"]
+	},
+	{
+		"nombre": "Matías Donnet",
+		"clubes": ["Boca Juniors", "Unión", "Belgrano"]
+	},
+	{
+		"nombre": "Jorge Broun",
+		"clubes": ["Rosario Central", "Colón", "Gimnasia LP"]
+	},
+	{
+		"nombre": "Enzo Kalinski",
+		"clubes": ["San Lorenzo", "Estudiantes", "Banfield"]
+	}
+]

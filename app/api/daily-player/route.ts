@@ -1,11 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
-import {
-	processPlayersData,
-	getPlayerClubs,
-	isCorrectAnswer,
-} from "@/lib/footballPlayers";
-import playersData from "@/database/query_jugadores.json";
+import { processPlayersData, isCorrectAnswer } from "@/lib/footballPlayers";
+import playersData from "@/database/jugadores_2000_2020.json";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -18,7 +14,7 @@ interface DailyPlayer {
 	player_name: string;
 	player_surname: string;
 	surname_is_unique: boolean;
-	player_wikidata_id: string;
+	player_id: string;
 	clubs: string[];
 	created_at: string;
 }
@@ -46,12 +42,11 @@ async function generateRandomPlayer(): Promise<DailyPlayer | null> {
 		// Obtener jugadores ya utilizados en los últimos 30 días
 		const { data: recentPlayers } = await supabaseAdmin
 			.from("daily_players")
-			.select("player_wikidata_id")
+			.select("player_id")
 			.order("date", { ascending: false })
 			.limit(30);
 
-		const usedPlayerIds =
-			recentPlayers?.map((p) => p.player_wikidata_id) || [];
+		const usedPlayerIds = recentPlayers?.map((p) => p.player_id) || [];
 
 		// Filtrar jugadores no utilizados recientemente
 		const availablePlayers = processedPlayers.filter(
@@ -81,8 +76,8 @@ async function generateRandomPlayer(): Promise<DailyPlayer | null> {
 				`Checking player: ${selectedPlayer.name} (${selectedPlayer.id})`
 			);
 
-			// Obtener clubes del jugador
-			const playerClubs = await getPlayerClubs(selectedPlayer.id);
+			// Los clubes ya están disponibles en el jugador
+			const playerClubs = selectedPlayer.clubs;
 
 			if (playerClubs.length >= 3) {
 				// Seleccionar 3 clubes al azar
@@ -100,7 +95,7 @@ async function generateRandomPlayer(): Promise<DailyPlayer | null> {
 					player_name: selectedPlayer.name,
 					player_surname: selectedPlayer.surname,
 					surname_is_unique: selectedPlayer.surnameIsUnique,
-					player_wikidata_id: selectedPlayer.id,
+					player_id: selectedPlayer.id,
 					clubs: selectedClubs,
 					created_at: new Date().toISOString(),
 				};
@@ -169,7 +164,7 @@ async function getOrCreateDailyPlayer(): Promise<DailyPlayer | null> {
 					player_name: newPlayer.player_name,
 					player_surname: newPlayer.player_surname,
 					surname_is_unique: newPlayer.surname_is_unique,
-					player_wikidata_id: newPlayer.player_wikidata_id,
+					player_id: newPlayer.player_id,
 					clubs: newPlayer.clubs,
 				},
 			])
@@ -209,7 +204,7 @@ export async function GET() {
 			id: dailyPlayer.id,
 			date: dailyPlayer.date,
 			clubs: dailyPlayer.clubs,
-			wikidata_id: dailyPlayer.player_wikidata_id,
+			player_id: dailyPlayer.player_id,
 		});
 	} catch (error) {
 		console.error("Error in GET /api/daily-player:", error);

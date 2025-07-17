@@ -37,7 +37,7 @@ export interface DailyPlayer {
 	player_name: string;
 	player_surname: string;
 	surname_is_unique: boolean;
-	player_wikidata_id: string;
+	player_id: string;
 	clubs: string[];
 	created_at: string;
 }
@@ -145,7 +145,7 @@ export async function getTodayPlayer(): Promise<DailyPlayer | null> {
 			player_name: "", // No se revela hasta que se adivine
 			player_surname: "", // No se revela hasta que se adivine
 			surname_is_unique: false, // No se revela hasta que se adivine
-			player_wikidata_id: result.wikidata_id,
+			player_id: result.player_id,
 			clubs: result.clubs,
 			created_at: new Date().toISOString(),
 		};
