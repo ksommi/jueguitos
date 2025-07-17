@@ -161,98 +161,84 @@ export async function signUpUser(
 	password: string,
 	username: string
 ): Promise<{ user: SupabaseUser | null; userRecord: User | null }> {
-	try {
-		// Crear usuario en Supabase Auth
-		const { data: authData, error: authError } = await supabase.auth.signUp({
-			email,
-			password,
-		});
+	// Crear usuario en Supabase Auth
+	const { data: authData, error: authError } = await supabase.auth.signUp({
+		email,
+		password,
+	});
 
-		if (authError || !authData.user) {
-			throw new Error(
-				`Error creando usuario: ${
-					authError?.message || "Usuario no creado"
-				}`
-			);
-		}
-
-		// Si email confirmation está habilitado, el usuario necesita confirmar email primero
-		if (
-			!authData.user.email_confirmed_at &&
-			authData.user.confirmation_sent_at
-		) {
-			return {
-				user: authData.user,
-				userRecord: null,
-			};
-		}
-
-		// Crear perfil de usuario en nuestra tabla solo si está confirmado o confirmación deshabilitada
-		const { data, error } = await supabase
-			.from("users")
-			.insert([
-				{
-					id: authData.user.id,
-					username,
-					total_games: 0,
-					total_wins: 0,
-					current_streak: 0,
-					best_streak: 0,
-					average_attempts: 0,
-				},
-			])
-			.select()
-			.single();
-
-		if (error) {
-			throw new Error(`Error creando perfil de usuario: ${error.message}`);
-		}
-
-		return { user: authData.user, userRecord: data };
-	} catch (error) {
-		handleGlobalError(error, "registro de usuario");
-		return { user: null, userRecord: null };
+	if (authError || !authData.user) {
+		throw new Error(
+			`Error creando usuario: ${authError?.message || "Usuario no creado"}`
+		);
 	}
+
+	// Si email confirmation está habilitado, el usuario necesita confirmar email primero
+	if (
+		!authData.user.email_confirmed_at &&
+		authData.user.confirmation_sent_at
+	) {
+		return {
+			user: authData.user,
+			userRecord: null,
+		};
+	}
+
+	// Crear perfil de usuario en nuestra tabla solo si está confirmado o confirmación deshabilitada
+	const { data, error } = await supabase
+		.from("users")
+		.insert([
+			{
+				id: authData.user.id,
+				username,
+				total_games: 0,
+				total_wins: 0,
+				current_streak: 0,
+				best_streak: 0,
+				average_attempts: 0,
+			},
+		])
+		.select()
+		.single();
+
+	if (error) {
+		throw new Error(`Error creando perfil de usuario: ${error.message}`);
+	}
+
+	return { user: authData.user, userRecord: data };
 }
 
 export async function signInUser(
 	email: string,
 	password: string
 ): Promise<{ user: SupabaseUser | null; userRecord: User | null }> {
-	try {
-		// Autenticar con Supabase Auth
-		const { data: authData, error: authError } =
-			await supabase.auth.signInWithPassword({
-				email,
-				password,
-			});
+	// Autenticar con Supabase Auth
+	const { data: authData, error: authError } =
+		await supabase.auth.signInWithPassword({
+			email,
+			password,
+		});
 
-		if (authError || !authData.user) {
-			throw new Error(
-				`Error de autenticación: ${
-					authError?.message || "Credenciales inválidas"
-				}`
-			);
-		}
-
-		// Obtener perfil de usuario
-		const { data, error } = await supabase
-			.from("users")
-			.select("*")
-			.eq("id", authData.user.id)
-			.single();
-
-		if (error) {
-			throw new Error(
-				`Error obteniendo perfil de usuario: ${error.message}`
-			);
-		}
-
-		return { user: authData.user, userRecord: data };
-	} catch (error) {
-		handleGlobalError(error, "inicio de sesión");
-		return { user: null, userRecord: null };
+	if (authError || !authData.user) {
+		throw new Error(
+			`Error de autenticación: ${
+				authError?.message || "Credenciales inválidas"
+			}`
+		);
 	}
+
+	// Obtener perfil de usuario
+	const { data, error } = await supabase
+		.from("users")
+		.select("*")
+		.eq("id", authData.user.id)
+		.single();
+
+	if (error) {
+		throw new Error(`Error obteniendo perfil de usuario: ${error.message}`);
+	}
+
+	return { user: authData.user, userRecord: data };
 }
 
 export async function signInAnonymously(): Promise<{

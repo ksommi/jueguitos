@@ -206,7 +206,7 @@ const countryCodeMap: Record<string, string> = {
 	Zimbabue: "ZW",
 };
 
-// Mapeo de nombres en inglés a español
+// Mapeo de nombres en inglés a español - VERSIÓN COMPLETA Y CORREGIDA
 const countryNameMap: Record<string, string> = {
 	Afghanistan: "Afganistán",
 	Albania: "Albania",
@@ -218,7 +218,6 @@ const countryNameMap: Record<string, string> = {
 	Australia: "Australia",
 	Austria: "Austria",
 	Azerbaijan: "Azerbaiyán",
-	"The Bahamas": "Bahamas",
 	Bangladesh: "Bangladés",
 	Belarus: "Bielorrusia",
 	Belgium: "Bélgica",
@@ -248,8 +247,6 @@ const countryNameMap: Record<string, string> = {
 	Croatia: "Croacia",
 	Cuba: "Cuba",
 	Cyprus: "Chipre",
-	"Czech Republic": "República Checa",
-	"Côte d'Ivoire": "Costa de Marfil",
 	Denmark: "Dinamarca",
 	Djibouti: "Yibuti",
 	Dominica: "Dominica",
@@ -268,7 +265,6 @@ const countryNameMap: Record<string, string> = {
 	"French Southern and Antarctic Lands":
 		"Tierras Australes y Antárticas Francesas",
 	Gabon: "Gabón",
-	"The Gambia": "Gambia",
 	Georgia: "Georgia",
 	Germany: "Alemania",
 	Ghana: "Ghana",
@@ -307,7 +303,6 @@ const countryNameMap: Record<string, string> = {
 	Liechtenstein: "Liechtenstein",
 	Lithuania: "Lituania",
 	Luxembourg: "Luxemburgo",
-	Macedonia: "Macedonia del Norte",
 	Madagascar: "Madagascar",
 	Malawi: "Malaui",
 	Malaysia: "Malasia",
@@ -318,7 +313,6 @@ const countryNameMap: Record<string, string> = {
 	Mauritania: "Mauritania",
 	Mauritius: "Mauricio",
 	Mexico: "México",
-	Micronesia: "Micronesia",
 	Moldova: "Moldavia",
 	Monaco: "Mónaco",
 	Mongolia: "Mongolia",
@@ -356,10 +350,8 @@ const countryNameMap: Record<string, string> = {
 	"Saint Vincent and the Grenadines": "San Vicente y las Granadinas",
 	Samoa: "Samoa",
 	"San Marino": "San Marino",
-	"São Tomé and Príncipe": "Santo Tomé y Príncipe",
 	"Saudi Arabia": "Arabia Saudí",
 	Senegal: "Senegal",
-	Serbia: "Serbia",
 	Seychelles: "Seychelles",
 	"Sierra Leone": "Sierra Leona",
 	Singapore: "Singapur",
@@ -374,13 +366,11 @@ const countryNameMap: Record<string, string> = {
 	"Sri Lanka": "Sri Lanka",
 	Sudan: "Sudán",
 	Suriname: "Surinam",
-	Swaziland: "Esuatini",
 	Sweden: "Suecia",
 	Switzerland: "Suiza",
 	Syria: "Siria",
 	Taiwan: "Taiwán",
 	Tajikistan: "Tayikistán",
-	Tanzania: "Tanzania",
 	Thailand: "Tailandia",
 	Togo: "Togo",
 	Tonga: "Tonga",
@@ -397,12 +387,92 @@ const countryNameMap: Record<string, string> = {
 	Uruguay: "Uruguay",
 	Uzbekistan: "Uzbekistán",
 	Vanuatu: "Vanuatu",
-	"Vatican City": "Ciudad del Vaticano",
 	Venezuela: "Venezuela",
 	Vietnam: "Vietnam",
 	Yemen: "Yemen",
 	Zambia: "Zambia",
 	Zimbabwe: "Zimbabue",
+
+	// CORRECCIONES para países que aparecen diferente en GeoJSON
+	eSwatini: "Esuatini", // En lugar de "Swaziland"
+	"Ivory Coast": "Costa de Marfil", // En lugar de "Côte d'Ivoire"
+	Czechia: "República Checa", // En lugar de "Czech Republic"
+	Gambia: "Gambia", // En lugar de "The Gambia"
+	"North Macedonia": "Macedonia del Norte", // En lugar de "Macedonia"
+	"Federated States of Micronesia": "Micronesia", // En lugar de "Micronesia"
+	"São Tomé and Principe": "Santo Tomé y Príncipe", // En lugar de "São Tomé and Príncipe"
+	"Republic of Serbia": "Serbia", // En lugar de "Serbia"
+	"United Republic of Tanzania": "Tanzania", // En lugar de "Tanzania"
+	Vatican: "Ciudad del Vaticano", // En lugar de "Vatican City"
+
+	// TERRITORIOS Y DEPENDENCIAS (traducciones apropiadas)
+	Aland: "Islas Åland",
+	"American Samoa": "Samoa Americana",
+	Andorra: "Andorra",
+	Anguilla: "Anguila",
+	"Antigua and Barbuda": "Antigua y Barbuda",
+	Aruba: "Aruba",
+	Bahrain: "Baréin",
+	Barbados: "Barbados",
+	Bermuda: "Bermudas",
+	"British Virgin Islands": "Islas Vírgenes Británicas",
+	"Cabo Verde": "Cabo Verde",
+	"Cayman Islands": "Islas Caimán",
+	"Cook Islands": "Islas Cook",
+	Curaçao: "Curazao",
+	"Falkland Islands": "Islas Malvinas",
+	"Faroe Islands": "Islas Feroe",
+	"French Polynesia": "Polinesia Francesa",
+	Gibraltar: "Gibraltar",
+	Guam: "Guam",
+	Guernsey: "Guernsey",
+	"Hong Kong S.A.R.": "Hong Kong",
+	"Isle of Man": "Isla de Man",
+	Jersey: "Jersey",
+	Kosovo: "Kosovo",
+	"Macao S.A.R": "Macao",
+	Montserrat: "Montserrat",
+	"New Caledonia": "Nueva Caledonia",
+	Niue: "Niue",
+	"Norfolk Island": "Isla Norfolk",
+	"Northern Cyprus": "Chipre del Norte",
+	"Northern Mariana Islands": "Islas Marianas del Norte",
+	"Pitcairn Islands": "Islas Pitcairn",
+	"Puerto Rico": "Puerto Rico",
+	"Saint Barthelemy": "San Bartolomé",
+	"Saint Helena": "Santa Elena",
+	"Saint Martin": "San Martín",
+	"Saint Pierre and Miquelon": "San Pedro y Miquelón",
+	"Sint Maarten": "Sint Maarten",
+	Somaliland: "Somalilandia",
+	"South Georgia and the Islands": "Georgia del Sur e Islas Sandwich del Sur",
+	"Turks and Caicos Islands": "Islas Turcas y Caicos",
+	"United States Virgin Islands": "Islas Vírgenes de los Estados Unidos",
+	"Wallis and Futuna": "Wallis y Futuna",
+	"Western Sahara": "Sáhara Occidental",
+
+	// TERRITORIOS ESPECIALES Y BASES (mantener en inglés o traducir mínimamente)
+	"Akrotiri Sovereign Base Area": "Base Soberana de Akrotiri",
+	"Ashmore and Cartier Islands": "Islas Ashmore y Cartier",
+	"Bajo Nuevo Bank (Petrel Is.)": "Banco Bajo Nuevo",
+	"Baykonur Cosmodrome": "Cosmódromo de Baikonur",
+	"Bir Tawil": "Bir Tawil",
+	"Brazilian Island": "Isla Brasileña",
+	"British Indian Ocean Territory": "Territorio Británico del Océano Índico",
+	"Clipperton Island": "Isla Clipperton",
+	"Coral Sea Islands": "Islas del Mar del Coral",
+	"Cyprus No Mans Area": "Zona de Nadie de Chipre",
+	"Dhekelia Sovereign Base Area": "Base Soberana de Dhekelia",
+	"Heard Island and McDonald Islands": "Islas Heard y McDonald",
+	"Indian Ocean Territories": "Territorios del Océano Índico",
+	"Scarborough Reef": "Arrecife Scarborough",
+	"Serranilla Bank": "Banco Serranilla",
+	"Siachen Glacier": "Glaciar Siachen",
+	"Southern Patagonian Ice Field": "Campo de Hielo Patagónico Sur",
+	"Spratly Islands": "Islas Spratly",
+	"US Naval Base Guantanamo Bay": "Base Naval de Guantánamo",
+	"United States Minor Outlying Islands":
+		"Islas Menores Alejadas de Estados Unidos",
 };
 
 let countriesData: CountryData[] = [];

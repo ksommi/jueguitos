@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { AuthModal } from "@/components/AuthProvider";
 import {
 	getTodayPlayer,
 	getUserPlayerGameResult,
@@ -30,7 +31,9 @@ interface GameState {
 }
 
 export default function AdivinarJugador() {
-	const { user } = useAuth();
+	const { user, loading: userLoading } = useAuth();
+	const [showAuthModal, setShowAuthModal] = useState(false);
+	const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
 	const [gameState, setGameState] = useState<GameState>({
 		currentPlayer: null,
 		gameStatus: "loading",
@@ -527,127 +530,195 @@ export default function AdivinarJugador() {
 		);
 	};
 
+	// Mostrar pantalla de bienvenida si no hay usuario
+	const showAuthScreen = !userLoading && !user;
+
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-gray-900">
-			{/* Efectos de césped pixelado */}
-			<div className="absolute inset-0 opacity-10 pointer-events-none">
-				<div
-					className="absolute top-0 left-0 w-full h-full bg-repeat"
-					style={{
-						backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23059669' fill-opacity='0.3'%3E%3Cpath d='M20 20.5V18H0v-2h20v2.5zm0 1.5v8h-2v-8h2zm0-13V8H0V6h20v2.5zm0 1.5v8h-2v-8h2z'/%3E%3C/g%3E%3C/svg%3E")`,
-					}}
-				></div>
-			</div>
-
-			<div className="container mx-auto px-4 py-8 relative z-10">
-				{/* Header */}
-				<div className="text-center mb-8">
-					<h1 className="text-4xl md:text-6xl font-black text-white mb-4 font-mono tracking-wider">
-						<div className="relative">
-							<span className="text-green-400">⚽ </span>
-							<span className="bg-gradient-to-r bg-clip-text from-green-400 to-emerald-300 text-transparent">
-								ADIVINA EL FUTBOLISTA
-							</span>
-							<span className="text-green-400"> ⚽</span>
-							{/* Efecto pixelado */}
-							<div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-300/20 opacity-30 blur-sm -z-10"></div>
-						</div>
-					</h1>
-					<p className="text-green-300 text-lg font-mono tracking-wide">
-						&gt; Adivina el jugador argentino basándote en sus clubes_
-					</p>
-				</div>
-
-				{/* Botones de acción */}
-				<div className="flex justify-center gap-4 mb-8">
-					<button
-						onClick={() =>
-							setGameState((prev) => ({
-								...prev,
-								showInstructions: true,
-							}))
-						}
-						className="bg-green-800/80 hover:bg-green-700 border border-green-600 text-green-100 px-6 py-2 rounded font-mono transition-colors shadow-lg hover:shadow-green-500/25"
-					>
-						📖 INSTRUCCIONES
-					</button>
-					<button
-						onClick={() =>
-							setGameState((prev) => ({ ...prev, showRanking: true }))
-						}
-						className="bg-yellow-600/80 hover:bg-yellow-500 border border-yellow-500 text-yellow-100 px-6 py-2 rounded font-mono transition-colors shadow-lg hover:shadow-yellow-500/25"
-					>
-						🏆 RANKING
-					</button>
-				</div>
-
-				{/* Contenido del juego */}
-				<div className="max-w-4xl mx-auto">{renderGameContent()}</div>
-
-				{/* Modales */}
-				<GameInstructionsModal
-					isOpen={gameState.showInstructions}
-					onClose={() =>
-						setGameState((prev) => ({ ...prev, showInstructions: false }))
-					}
-					title="Instrucciones - Adivina el Futbolista"
-					instructions={[
-						"Todos los días aparece un nuevo futbolista argentino para adivinar.",
-						"Te mostramos 3 clubes en los que jugó el futbolista.",
-						"Tienes que adivinar el nombre del jugador.",
-						"Puedes escribir el nombre completo o solo el apellido.",
-						"El juego acepta tanto nombres como apellidos únicos.",
-						"¡Tendrás múltiples intentos hasta adivinarlo!",
-						"Comparte tus resultados y compite con otros jugadores.",
-					]}
-				/>
-
-				<VictoryModal
-					isOpen={gameState.showVictory}
-					onClose={() =>
-						setGameState((prev) => ({ ...prev, showVictory: false }))
-					}
-					attempts={gameState.attempts}
-					countryName={gameState.correctAnswer}
-					onShareWhatsApp={shareOnWhatsApp}
-					onCopyToClipboard={copyToClipboard}
-				/>
-
-				<RankingModal
-					isOpen={gameState.showRanking}
-					onClose={() =>
-						setGameState((prev) => ({ ...prev, showRanking: false }))
-					}
-					title="🏆 RANKING - ADIVINA EL FUTBOLISTA"
-					subtitle="Los mejores jugadores del juego de fútbol"
-					gameType="football"
-				/>
-
-				{gameState.showError && (
-					<div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-						<div className="bg-gradient-to-br from-red-900/90 to-gray-900/90 border-2 border-red-600/50 p-6 rounded-lg max-w-md w-full mx-4 shadow-xl shadow-red-900/30">
-							<h3 className="text-xl font-bold text-red-400 mb-4 font-mono tracking-wider flex items-center gap-2">
-								<span className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></span>
-								ERROR
-							</h3>
-							<p className="text-red-200 mb-6 font-mono text-sm">
-								&gt; {gameState.errorMessage}
+		<>
+			{/* Pantalla de bienvenida */}
+			{showAuthScreen && (
+				<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-900 via-green-800 to-gray-900">
+					<div className="text-center max-w-md mx-auto p-6">
+						<div className="mb-6">
+							<h1 className="text-4xl font-bold text-green-400 font-mono mb-4">
+								⚽ ADIVINA EL FUTBOLISTA
+							</h1>
+							<p className="text-green-300 font-mono mb-4">
+								Registro requerido para jugar
 							</p>
+							<p className="text-green-300/80 font-mono text-sm">
+								Crea tu perfil para competir en el ranking diario
+							</p>
+						</div>
+						<div className="flex flex-col gap-3">
+							<button
+								onClick={() => {
+									setAuthMode("signup");
+									setShowAuthModal(true);
+								}}
+								className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-black font-mono font-bold tracking-wider transition-all duration-300 hover:scale-105"
+							>
+								✨ REGISTRARSE
+							</button>
+							<button
+								onClick={() => {
+									setAuthMode("login");
+									setShowAuthModal(true);
+								}}
+								className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white font-mono font-bold tracking-wider transition-all duration-300 hover:scale-105"
+							>
+								🔑 INICIAR SESIÓN
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+			{/* Modal de autenticación siempre montado mientras no hay usuario */}
+			{showAuthScreen && (
+				<AuthModal
+					isOpen={showAuthModal}
+					onClose={() => setShowAuthModal(false)}
+					onSuccess={() => setShowAuthModal(false)}
+					initialMode={authMode}
+				/>
+			)}
+			{/* Juego normal si hay usuario */}
+			{!showAuthScreen && (
+				<div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-gray-900">
+					{/* Efectos de césped pixelado */}
+					<div className="absolute inset-0 opacity-10 pointer-events-none">
+						<div
+							className="absolute top-0 left-0 w-full h-full bg-repeat"
+							style={{
+								backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23059669' fill-opacity='0.3'%3E%3Cpath d='M20 20.5V18H0v-2h20v2.5zm0 1.5v8h-2v-8h2zm0-13V8H0V6h20v2.5zm0 1.5v8h-2v-8h2z'/%3E%3C/g%3E%3C/svg%3E")`,
+							}}
+						></div>
+					</div>
+
+					<div className="container mx-auto px-4 py-8 relative z-10">
+						{/* Header */}
+						<div className="text-center mb-8">
+							<h1 className="text-4xl md:text-6xl font-black text-white mb-4 font-mono tracking-wider">
+								<div className="relative">
+									<span className="text-green-400">⚽ </span>
+									<span className="bg-gradient-to-r bg-clip-text from-green-400 to-emerald-300 text-transparent">
+										ADIVINA EL FUTBOLISTA
+									</span>
+									<span className="text-green-400"> ⚽</span>
+									{/* Efecto pixelado */}
+									<div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-300/20 opacity-30 blur-sm -z-10"></div>
+								</div>
+							</h1>
+							<p className="text-green-300 text-lg font-mono tracking-wide">
+								&gt; Adivina el jugador argentino basándote en sus
+								clubes_
+							</p>
+						</div>
+
+						{/* Botones de acción */}
+						<div className="flex justify-center gap-4 mb-8">
 							<button
 								onClick={() =>
 									setGameState((prev) => ({
 										...prev,
-										showError: false,
+										showInstructions: true,
 									}))
 								}
-								className="w-full bg-red-600 hover:bg-red-500 border-2 border-red-500 text-white font-bold py-2 px-4 rounded font-mono transition-colors shadow-lg"
+								className="bg-green-800/80 hover:bg-green-700 border border-green-600 text-green-100 px-6 py-2 rounded font-mono transition-colors shadow-lg hover:shadow-green-500/25"
 							>
-								&gt; CERRAR
+								📖 INSTRUCCIONES
+							</button>
+							<button
+								onClick={() =>
+									setGameState((prev) => ({
+										...prev,
+										showRanking: true,
+									}))
+								}
+								className="bg-yellow-600/80 hover:bg-yellow-500 border border-yellow-500 text-yellow-100 px-6 py-2 rounded font-mono transition-colors shadow-lg hover:shadow-yellow-500/25"
+							>
+								🏆 RANKING
 							</button>
 						</div>
+
+						{/* Contenido del juego */}
+						<div className="max-w-4xl mx-auto">{renderGameContent()}</div>
+
+						{/* Modales */}
+						<GameInstructionsModal
+							isOpen={gameState.showInstructions}
+							onClose={() =>
+								setGameState((prev) => ({
+									...prev,
+									showInstructions: false,
+								}))
+							}
+							title="Instrucciones - Adivina el Futbolista"
+							instructions={[
+								"Todos los días aparece un nuevo futbolista argentino para adivinar.",
+								"Te mostramos 3 clubes en los que jugó el futbolista.",
+								"Tienes que adivinar el nombre del jugador.",
+								"Puedes escribir el nombre completo o solo el apellido.",
+								"El juego acepta tanto nombres como apellidos únicos.",
+								"¡Tendrás múltiples intentos hasta adivinarlo!",
+								"Comparte tus resultados y compite con otros jugadores.",
+							]}
+						/>
+
+						<VictoryModal
+							isOpen={gameState.showVictory}
+							onClose={() =>
+								setGameState((prev) => ({
+									...prev,
+									showVictory: false,
+								}))
+							}
+							attempts={gameState.attempts}
+							countryName={gameState.correctAnswer}
+							onShareWhatsApp={shareOnWhatsApp}
+							onCopyToClipboard={copyToClipboard}
+						/>
+
+						<RankingModal
+							isOpen={gameState.showRanking}
+							onClose={() =>
+								setGameState((prev) => ({
+									...prev,
+									showRanking: false,
+								}))
+							}
+							title="🏆 RANKING - ADIVINA EL FUTBOLISTA"
+							subtitle="Los mejores jugadores del juego de fútbol"
+							gameType="football"
+						/>
+
+						{gameState.showError && (
+							<div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+								<div className="bg-gradient-to-br from-red-900/90 to-gray-900/90 border-2 border-red-600/50 p-6 rounded-lg max-w-md w-full mx-4 shadow-xl shadow-red-900/30">
+									<h3 className="text-xl font-bold text-red-400 mb-4 font-mono tracking-wider flex items-center gap-2">
+										<span className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></span>
+										ERROR
+									</h3>
+									<p className="text-red-200 mb-6 font-mono text-sm">
+										&gt; {gameState.errorMessage}
+									</p>
+									<button
+										onClick={() =>
+											setGameState((prev) => ({
+												...prev,
+												showError: false,
+											}))
+										}
+										className="w-full bg-red-600 hover:bg-red-500 border-2 border-red-500 text-white font-bold py-2 px-4 rounded font-mono transition-colors shadow-lg"
+									>
+										&gt; CERRAR
+									</button>
+								</div>
+							</div>
+						)}
 					</div>
-				)}
-			</div>
-		</div>
+				</div>
+			)}
+		</>
 	);
 }

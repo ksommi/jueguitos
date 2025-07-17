@@ -80,10 +80,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				setUser(userRecord);
 				return true;
 			}
-			return false;
+			throw new Error("Error al crear la cuenta. Inténtalo de nuevo.");
 		} catch (error) {
 			console.error("Error signing up:", error);
-			return false;
+			throw error; // Re-lanzar el error para que el modal lo capture
 		} finally {
 			setLoading(false);
 		}
@@ -100,10 +100,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				setUser(userRecord);
 				return true;
 			}
-			return false;
+			throw new Error(
+				"Credenciales incorrectas. Verifica tu email y contraseña."
+			);
 		} catch (error) {
 			console.error("Error signing in:", error);
-			return false;
+			throw error; // Re-lanzar el error para que el modal lo capture
 		} finally {
 			setLoading(false);
 		}
@@ -146,10 +148,12 @@ export function useAuth() {
 export function AuthModal({
 	isOpen,
 	onClose,
+	onSuccess,
 	initialMode = "signup",
 }: {
 	isOpen: boolean;
 	onClose: () => void;
+	onSuccess: () => void;
 	initialMode?: "login" | "signup";
 }) {
 	const [mode, setMode] = useState<"login" | "signup">(initialMode);
@@ -161,9 +165,28 @@ export function AuthModal({
 	const { signUp, signIn } = useAuth();
 
 	// Actualizar el modo si cambia el initialMode
+	// Solo cambiar el modo si el modal se abre manualmente
 	useEffect(() => {
-		setMode(initialMode);
-	}, [initialMode]);
+		if (isOpen) {
+			setMode(initialMode);
+		}
+	}, [initialMode, isOpen]);
+
+	// Limpiar campos y error solo cuando el modal se cierra
+	useEffect(() => {
+		if (!isOpen) {
+			setEmail("");
+			setPassword("");
+			setUsername("");
+			setError("");
+		}
+	}, [isOpen]);
+
+	// Limpiar errores cuando se cambia de modo
+	const handleModeChange = (newMode: "login" | "signup") => {
+		setMode(newMode);
+		setError(""); // Limpiar errores al cambiar de modo
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -171,8 +194,6 @@ export function AuthModal({
 		setError("");
 
 		try {
-			let success = false;
-
 			if (mode === "signup") {
 				if (!username.trim() || username.length < 3) {
 					setError(
@@ -180,19 +201,59 @@ export function AuthModal({
 					);
 					return;
 				}
-				success = await signUp(email, password, username);
+				if (password.length < 6) {
+					setError("La contraseña debe tener al menos 6 caracteres");
+					return;
+				}
+				await signUp(email, password, username);
+				// Si llegamos aquí, la autenticación fue exitosa
+				setEmail("");
+				setPassword("");
+				setUsername("");
+				setError("");
+				onSuccess();
 			} else {
-				success = await signIn(email, password);
+				if (!email.trim() || !password.trim()) {
+					setError("Por favor completa todos los campos");
+					return;
+				}
+				await signIn(email, password);
+				// Si llegamos aquí, la autenticación fue exitosa
+				setEmail("");
+				setPassword("");
+				setUsername("");
+				setError("");
+				onSuccess();
 			}
-
-			if (success) {
-				onClose();
-			} else {
-				setError("Error al autenticarse. Inténtalo de nuevo.");
-			}
-		} catch (error) {
+		} catch (error: unknown) {
 			console.error("Error al autenticarse:", error);
-			setError("Error al autenticarse. Inténtalo de nuevo.");
+
+			// Manejo específico de errores de Supabase
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
+
+			if (
+				errorMessage.includes("Invalid login credentials") ||
+				errorMessage.includes("Credenciales inválidas") ||
+				errorMessage.includes("Error de autenticación")
+			) {
+				setError("❌ Email o contraseña incorrectos");
+			} else if (errorMessage.includes("Email not confirmed")) {
+				setError("❌ Debes confirmar tu email antes de iniciar sesión");
+			} else if (errorMessage.includes("User already registered")) {
+				setError(
+					"❌ Este email ya está registrado. Intenta iniciar sesión."
+				);
+			} else if (errorMessage.includes("Password should be at least")) {
+				setError("❌ La contraseña debe tener al menos 6 caracteres");
+			} else if (errorMessage.includes("Invalid email")) {
+				setError("❌ Formato de email inválido");
+			} else if (mode === "signup") {
+				setError("❌ Error al crear la cuenta. Inténtalo de nuevo.");
+			} else {
+				setError("❌ Error al iniciar sesión. Verifica tus credenciales.");
+			}
+			// No limpiar campos ni cerrar modal si hay error
 		} finally {
 			setLoading(false);
 		}
@@ -225,7 +286,8 @@ export function AuthModal({
 
 						<div className="flex gap-2 mb-6">
 							<button
-								onClick={() => setMode("login")}
+								type="button"
+								onClick={() => handleModeChange("login")}
 								className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex-1 ${
 									mode === "login"
 										? "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/25 border border-purple-400/50"
@@ -235,7 +297,8 @@ export function AuthModal({
 								🔑 Iniciar Sesión
 							</button>
 							<button
-								onClick={() => setMode("signup")}
+								type="button"
+								onClick={() => handleModeChange("signup")}
 								className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex-1 ${
 									mode === "signup"
 										? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg shadow-pink-500/25 border border-pink-400/50"
