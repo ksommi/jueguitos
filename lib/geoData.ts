@@ -739,8 +739,8 @@ export function calculateMinimumDistanceGeometry(
 	const coords2 = getCoordinates(geometry2);
 
 	// Calcular la distancia mínima entre todas las combinaciones de puntos
-	// Para optimizar, tomaremos una muestra de puntos en lugar de todos
-	const sampleSize = Math.min(50, coords1.length, coords2.length);
+	// Aumentar la muestra para mayor precisión
+	const sampleSize = Math.min(300, coords1.length, coords2.length); // antes 50, ahora 300
 	const step1 = Math.max(1, Math.floor(coords1.length / sampleSize));
 	const step2 = Math.max(1, Math.floor(coords2.length / sampleSize));
 
